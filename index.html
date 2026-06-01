@@ -8,41 +8,19 @@
 </head>
 <body>
     <div class="container">
-
         <div id="login-section" class="card" style="display: block;">
             <h2>🔐 စနစ်အတွင်းသို့ ဝင်ရောက်ရန်</h2>
-            <p style="font-size: 13px; color: #7f8c8d; margin-bottom: 15px;">ကျေးဇူးပြု၍ ဖုန်းနံပါတ်နှင့် ဝင်ခွင့်ကုဒ် နှစ်ခုလုံး မှန်ကန်စွာ ဖြည့်ပါ</p>
-            
             <form id="login-form" onsubmit="event.preventDefault(); loginUser();">
                 <input type="tel" id="user-phone" placeholder="ဖုန်းနံပါတ် ရိုက်ထည့်ပါ" required autocomplete="username">
                 <input type="password" id="user-password" placeholder="ဝင်ခွင့်ကုဒ် (Password) ရိုက်ထည့်ပါ" style="margin-top: 10px;" required autocomplete="current-password">
-                <button type="submit" id="login-btn" style="margin-top: 15px;">🔐 အကောင့်အတည်ပြုမည်</button>
+                <button type="submit" id="login-btn" style="margin-top: 15px; background: #3498db;">🔐 အကောင့်ဝင်မည်</button>
             </form>
         </div>
 
         <div id="main-app" style="display: none;">
-            
             <div class="user-bar">
                 <span id="active-user-display">📱 Loading...</span>
                 <button onclick="logoutUser()" style="background:#e74c3c; padding: 5px 10px; font-size:12px;">ထွက်မည် 🏃</button>
-            </div>
-
-            <div id="admin-panel" class="card" style="display: none; background: #fdfefe; border: 1px solid #bdc3c7;">
-                <div class="user-bar" style="background:#2c3e50; margin-bottom: 20px;">
-                    <span style="color:#f1c40f; font-weight: bold;">🔑 ADMIN DASHBOARD</span>
-                </div>
-                <h3>👤 ဝန်ထမ်း (User) အသစ်တိုးရန်</h3>
-                
-                <label style="font-size:13px; font-weight:bold; color:#2c3e50;">၁။ ဝန်ထမ်း ဖုန်းနံပါတ်:</label>
-                <input type="tel" id="reg-phone" placeholder="အသစ်တိုးမည့်သူ၏ ဖုန်းနံပါတ်" style="margin-top:5px; margin-bottom:12px;">
-
-                <label style="font-size:13px; font-weight:bold; color:#2c3e50;">၂။ ဝန်ထမ်းအတွက် ပေးမည့် Password:</label>
-                <input type="text" id="reg-password" placeholder="၎င်းဖုန်းအတွက် ပေးမည့် ဝင်ခွင့် Password" style="margin-top:5px; margin-bottom:15px;">
-                
-                <label style="font-size:13px; font-weight:bold; color:#c0392b;">၃။ တခြားသူမတိုးနိုင်ရန် Admin Password ကိုရိုက်ပါ:</label>
-                <input type="password" id="admin-confirm-password" placeholder="သင့်ရဲ့ Admin Password ကို ပြန်ရိုက်ပါ" style="margin-top:5px; border: 1px solid #e74c3c;">
-                
-                <button onclick="adminRegisterUser()" style="margin-top:15px; background:#27ae60; color: white;">➕ အတည်ပြုပြီး အကောင့်အသစ်ဆောက်မည်</button>
             </div>
 
             <div class="card balance-card">
@@ -63,7 +41,8 @@
                 <input type="number" id="amount" placeholder="ပမာဏ (ကျပ်)" inputmode="numeric" required>
                 <input type="text" id="description" placeholder="အကြောင်းအရာ" required>
                 <select id="method" onchange="toggleBankNameInput()">
-                    <option value="Banking">🏦 Banking (ဘဏ် / Kpay)</option><option value="Cash">💵 Cash (လက်ငင်းငွေသား)</option>
+                    <option value="Banking">🏦 Banking (ဘဏ် / Kpay)</option>
+                    <option value="Cash">💵 Cash (လက်ငင်းငွေသား)</option>
                 </select>
                 <select id="bank-select" onchange="toggleCustomBankInput()">
                     <option value="Kpay">KBZ Pay</option>
@@ -72,7 +51,6 @@
                     <option value="CBPay">CB Pay</option>
                     <option value="KBZ Bank">KBZ Bank</option>
                     <option value="CB Bank">CB Bank</option>
-                    <option value="AYA Bank">AYA Bank</option>
                     <option value="Other">အခြားဘဏ်နာမည် ရေးမည်...</option>
                 </select>
                 <input type="text" id="custom-bank-name" placeholder="ဘဏ်နာမည် ရိုက်ထည့်ပါ" style="display: none; margin-top: 10px;">
@@ -80,35 +58,6 @@
                     <button onclick="addTransaction('ဝင်ငွေ')" style="background: #27ae60; flex: 1;">➕ ဝင်ငွေထည့်မည်</button>
                     <button onclick="addTransaction('ထွက်ငွေ')" style="background: #e74c3c; flex: 1;">➖ ထွက်ငွေထည့်မည်</button>
                 </div>
-            </div>
-
-            <div class="card filter-card">
-                <h3>🔍 စာရင်းမှတ်တမ်း ခွဲခြားကြည့်ရှုခြင်း</h3>
-                <div style="margin-bottom: 10px;">
-                    <label style="font-size:13px; font-weight:bold; color:#555;">📅 ရက်စွဲဖြင့်ကြည့်ရန်:</label>
-                    <input type="date" id="filter-date" onchange="render()">
-                </div>
-                <div style="margin-bottom: 10px;">
-                    <label style="font-size:13px; font-weight:bold; color:#555;">🏦 ငွေပေးချေမှုစနစ်ဖြင့် ခွဲကြည့်ရန်:</label>
-                    <select id="filter-method" onchange="render()">
-                        <option value="All">🔄 အားလုံးပြရန် (ဘဏ် + ငွေသား)</option>
-                        <option value="Cash">💵 Cash (လက်ငင်းငွေသားသီးသန့်)</option>
-                        <option value="Kpay">🏦 KBZ Pay သီးသန့်</option>
-                        <option value="Wavepay">🏦 Wave Pay သီးသန့်</option>
-                        <option value="AYAPay">🏦 AYA Pay သီးသန့်</option>
-                        <option value="CBPay">🏦 CB Pay သီးသန့်</option>
-                        <option value="KBZ Bank">🏦 KBZ Bank သီးသန့်</option>
-                        <option value="CB Bank">🏦 CB Bank သီးသန့်</option>
-                        <option value="AYA Bank">🏦 AYA Bank သီးသန့်</option>
-                        <option value="Banking_Other">🏦 အခြားဘဏ်စာရင်းများ</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="font-size:13px; font-weight:bold; color:#555;">✏️ အကြောင်းအရာဖြင့် ရှာဖွေရန်:</label>
-                    <input type="text" id="filter-text" oninput="render()" placeholder="ဥပမာ- ဆန်ဖိုး၊ လစာ စသဖြင့်...">
-                </div>
-                <button onclick="clearFilter()" style="margin-top: 12px; background: #7f8c8d;">🔄 ရှာဖွေမှုများကို ပြန်ရှင်းမည် (Reset)</button>
-                <div id="filter-summary" style="display:none; margin-top: 12px; padding: 10px; background: #eef2f7; border-radius: 6px; font-size: 13px; line-height: 1.5; border-left: 4px solid #3498db;"></div>
             </div>
 
             <div class="card">
