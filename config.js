@@ -1,11 +1,9 @@
-// config.js - Global Variables & Standard Network Setup
-const google_script_url = "https://script.google.com/macros/s/AKfycbw-VP6_XJYzYTtVl1-WlD0vm3vIsLa8iArTN7AhNCwKo-idX6EnebfaF3sBgSs2p4bJSA/exec"; 
+// config.js - Global Variables
+const google_script_url = "https://script.google.com/macros/s/AKfycbw4YmxymLvDf8aJeO0dvZFKmnMAxBBMRHDlbCWYLt92LHGyS8jHqgHFvqy0M6kukMxPpw/exec"; 
 
 let current_user_key = localStorage.getItem('logged_user_key') || "";
 let current_acc_type = localStorage.getItem('logged_acc_type') || "";
 let transactions = [];      
-let unsynced_items = [];    
-let pending_deletes = [];   
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
