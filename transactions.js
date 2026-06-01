@@ -1,4 +1,4 @@
-// transactions.js - Data Insert & Sync (GET Query Mode)
+// transactions.js - Insert, Delete & Google Sync
 function addTransaction(type) {
     let amountInput = document.getElementById('amount').value.trim();
     const descInput = document.getElementById('description').value.trim();
@@ -15,7 +15,7 @@ function addTransaction(type) {
     const now = new Date();
     const newTx = {
         id: now.getTime().toString(),
-        accType: "Admin",
+        accType: current_acc_type || "Admin",
         type: type,
         amount: parseFloat(amountInput),
         description: descInput,
@@ -25,44 +25,63 @@ function addTransaction(type) {
         bankName: bankNameInput
     };
 
-    // ၁။ ဖုန်းမျက်နှာပြင်ပေါ်တွင် စာရင်းကို ချက်ချင်းတိုးပြမည် (Offline First)
+    // ၁။ ဖုန်းမျက်နှာပြင်ပေါ်တွင် စာရင်းကို ချက်ချင်းတိုးပြမည် (Offline First စနစ်)
     transactions.unshift(newTx);
     localStorage.setItem(`off_tx_${current_user_key}`, JSON.stringify(transactions));
     render();
 
-    // ၂။ Google Sheet သို့ လုံခြုံရေးအပိတ်အဆို့မရှိသော GET လမ်းကြောင်းဖြင့် ပို့ခြင်း
+    // ၂။ Google Sheet သို့ လုံခြုံရေးအပိတ်အဆို့ ကင်းဝေးသော URLSearchParams ပုံစံဖြင့် ပို့ခြင်း
     if (navigator.onLine) {
-        const queryString = new URLSearchParams({
-            action: "add",
-            userKey: current_user_key,
-            ...newTx
-        }).toString();
+        const formPayload = new URLSearchParams();
+        formPayload.append("action", "add");
+        formPayload.append("userKey", current_user_key);
+        Object.keys(newTx).forEach(key => formPayload.append(key, newTx[key]));
 
-        // fetch ဖြင့် Google ဆီသို့ တိုက်ရိုက် လှမ်းခေါ်လိုက်ခြင်း
-        fetch(`${google_script_url}?${queryString}`)
-        .then(res => res.json())
-        .then(resData => {
-            console.log("Response from Google:", resData);
-            // စာရင်းအသစ်များကို ၁.၅ စက္ကန့်အကြာတွင် Sheet ဆီကနေ ပြန်လည် ဆွဲယူမည်
-            setTimeout(fetchDataFromGoogleSheets, 1500);
+        fetch(google_script_url, {
+            method: "POST",
+            mode: "no-cors", // ဖုန်း Browser များတွင် Block မဖြစ်အောင် ကာကွယ်ထားသည်
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formPayload
         })
-        .catch(err => console.log("Network Sync Error:", err));
+        .then(() => {
+            console.log("Sent to Server");
+            setTimeout(fetchDataFromGoogleSheets, 2000); // ၂ စက္ကန့်အကြာတွင် ဒေတာပြန်ဆွဲမည်
+        })
+        .catch(err => console.log(err));
     }
 
-    // Input Box များကို ပြန်ရှင်းထုတ်ခြင်း
     document.getElementById('amount').value = "";
     document.getElementById('description').value = "";
 }
 
 function deleteTransaction(id) {
-    transactions = transactions.filter(t => t.id.toString() !== id.toString());
-    localStorage.setItem(`off_tx_${current_user_key}`, JSON.stringify(transactions));
-    render();
-    alert("စာရင်းကို ဖုန်းထဲမှ ဖျက်ပြီးပါပြီ။");
+    let deletePass = prompt("🔑 ဤစာရင်းဖျက်ရန် Admin Password ရိုက်ထည့်ပါ:");
+    if (deletePass === null) return; 
+    deletePass = convertMyanmarToEnglishDigits(deletePass.trim());
+
+    if (navigator.onLine) {
+        const formPayload = new URLSearchParams();
+        formPayload.append("action", "delete");
+        formPayload.append("id", id);
+        formPayload.append("adminPassword", deletePass);
+
+        fetch(google_script_url, {
+            method: "POST",
+            mode: "no-cors",
+            body: formPayload
+        }).then(() => {
+            alert("🎉 ဖျက်သိမ်းပြီးပါပြီ (Server သို့ လှမ်းပို့ပြီး)");
+            setTimeout(fetchDataFromGoogleSheets, 1500);
+        });
+    } else {
+        alert("🌐 စာရင်းဖျက်ရန် အင်တာနက်လိုင်း လိုအပ်ပါသည်။");
+    }
 }
 
 function fetchDataFromGoogleSheets() {
     if (!navigator.onLine || !current_user_key) return;
+    
+    // ဖုန်းများတွင် CORS Network Error မတက်စေရန် စာရင်းမှတ်တမ်းဟောင်းများကို Fetch လုပ်သည့်စနစ်
     fetch(`${google_script_url}?action=fetch&userKey=${current_user_key}`)
     .then(res => res.json())
     .then(data => {
@@ -71,5 +90,5 @@ function fetchDataFromGoogleSheets() {
             localStorage.setItem(`off_tx_${current_user_key}`, JSON.stringify(transactions));
             render(); 
         }
-    }).catch(e => console.log("Fetch Error:", e));
+    }).catch(e => console.log(e));
 }
