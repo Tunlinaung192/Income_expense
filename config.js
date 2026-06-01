@@ -1,7 +1,7 @@
 // config.js - Global Variables, CORS Setup & Service Worker Registration
 
 // ⚠️ အရေးကြီး - အောက်ကလင့်ခ်နေရာမှာ သင့်ရဲ့ Google Web App URL အသစ်ကြီးကို သေချာထည့်ပေးပါ
-const google_script_url = "https://script.google.com/macros/s/AKfycbx8kSLKSUwEf0YUlYbbv_wV71WKePuc8vIMSSWorEhSq-12xUxMvLlefcuBvdW1dPXE/exec"; 
+const google_script_url = "https://script.google.com/macros/s/AKfycbzzyAlHIM950G1nbZFLviiyYAjOFMcTpTdHomraP_o0-ay8tMWa_3nVNbK52FInS8Ts/exec"; 
 
 let current_user_key = localStorage.getItem('logged_user_key') || "";
 let current_acc_type = localStorage.getItem('logged_acc_type') || "";
