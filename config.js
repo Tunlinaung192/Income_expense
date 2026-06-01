@@ -1,5 +1,5 @@
 // config.js - Global Variables & Service Worker Registration
-const google_script_url = "https://script.google.com/macros/s/AKfycbzK2cpq8Ik09bA35BmjKIDVw1yFmQJ6KVQuGTpXuJznBwOQPuH4Y9LO5iGqOiPDI2C5/exec"; 
+const google_script_url = "https://script.google.com/macros/s/AKfycbx8kSLKSUwEf0YUlYbbv_wV71WKePuc8vIMSSWorEhSq-12xUxMvLlefcuBvdW1dPXE/exec"; 
 
 let current_user_key = localStorage.getItem('logged_user_key') || "";
 let current_acc_type = localStorage.getItem('logged_acc_type') || "";
