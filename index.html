@@ -8,8 +8,12 @@
 </head>
 <body>
     <div class="container">
+        
         <div id="login-section" class="card" style="display: block;">
             <h2>🔐 စနစ်အတွင်းသို့ ဝင်ရောက်ရန်</h2>
+            <p style="font-size: 13px; color: #7f8c8d; text-align: center; margin-bottom: 15px;">
+                ကျေးဇူးပြု၍ ဖုန်းနံပါတ်နှင့် ဝင်ခွင့်ကုဒ် နှစ်ခုလုံး မှန်ကန်စွာ ဖြည့်ပါ
+            </p>
             <form id="login-form" onsubmit="event.preventDefault(); loginUser();">
                 <input type="tel" id="user-phone" placeholder="ဖုန်းနံပါတ် ရိုက်ထည့်ပါ" required autocomplete="username">
                 <input type="password" id="user-password" placeholder="ဝင်ခွင့်ကုဒ် (Password) ရိုက်ထည့်ပါ" style="margin-top: 10px;" required autocomplete="current-password">
@@ -18,56 +22,64 @@
         </div>
 
         <div id="main-app" style="display: none;">
-            <div class="user-bar">
-                <span id="active-user-display">📱 Loading...</span>
-                <button onclick="logoutUser()" style="background:#e74c3c; padding: 5px 10px; font-size:12px;">ထွက်မည် 🏃</button>
+            
+            <div class="user-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #f8f9fa; padding: 10px; border-radius: 8px;">
+                <span id="active-user-display" style="font-weight: bold; color: #2c3e50;">📱 Loading...</span>
+                <button onclick="logoutUser()" style="background:#e74c3c; color: white; border: none; padding: 6px 12px; font-size:12px; border-radius: 4px; cursor: pointer;">ထွက်မည် 🏃</button>
             </div>
 
             <div class="card balance-card">
-                <h3>💰 စုစုပေါင်းလက်ကျန်</h3>
-                <h1 id="net-balance">0 ကျပ်</h1>
-                <div class="balance-row">
-                    <div>🔺 ဝင်ငွေစုစုပေါင်း:<br><span id="total-income" class="text-inc">0 ကျပ်</span></div>
-                    <div>🔻 ထွက်ငွေစုစုပေါင်း:<br><span id="total-expense" class="text-exp">0 ကျပ်</span></div>
+                <h3>💰 စုစုပေါင်းလက်ကျန်ငွေ</h3>
+                <h1 id="net-balance" style="font-size: 32px; color: #2c3e50; margin: 10px 0;">0 ကျပ်</h1>
+                <div class="balance-row" style="display: flex; justify-content: space-between; gap: 10px;">
+                    <div style="flex: 1; background: #eafaf1; padding: 10px; border-radius: 6px;">🔺 ဝင်ငွေစုစုပေါင်း:<br><span id="total-income" class="text-inc" style="font-weight: bold; color: #27ae60;">0 ကျပ်</span></div>
+                    <div style="flex: 1; background: #fdedec; padding: 10px; border-radius: 6px;">🔻 ထွက်ငွေစုစုပေါင်း:<br><span id="total-expense" class="text-exp" style="font-weight: bold; color: #e74c3c;">0 ကျပ်</span></div>
                 </div>
-                <div class="balance-row" style="margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 10px;">
-                    <div>🏦 ဘဏ်လက်ကျန်:<br><span id="banking-balance" style="color:#3498db;">0 ကျပ်</span></div>
-                    <div>💵 လက်ငင်းလက်ကျန်:<br><span id="cash-balance" style="color:#f39c12;">0 ကျပ်</span></div>
+                <div class="balance-row" style="margin-top: 12px; border-top: 1px dashed #ddd; padding-top: 10px; display: flex; justify-content: space-between; gap: 10px;">
+                    <div style="flex: 1;"> Romano 🏦 ဘဏ်လက်ကျန်:<br><span id="banking-balance" style="font-weight: bold; color:#3498db;">0 ကျပ်</span></div>
+                    <div style="flex: 1;">💵 လက်ငင်းလက်ကျန်:<br><span id="cash-balance" style="font-weight: bold; color:#f39c12;">0 ကျပ်</span></div>
                 </div>
             </div>
 
-            <div class="card form-card">
+            <div class="card form-card" style="margin-top: 15px;">
                 <h3>📝 စာရင်းအသစ်ထည့်ရန်</h3>
-                <input type="number" id="amount" placeholder="ပမာဏ (ကျပ်)" inputmode="numeric" required>
-                <input type="text" id="description" placeholder="အကြောင်းအရာ" required>
-                <select id="method" onchange="toggleBankNameInput()">
+                <input type="number" id="amount" placeholder="ပမာဏ (ကျပ်)" inputmode="numeric" style="width: 100%; margin-top: 10px; padding: 10px;" required>
+                <input type="text" id="description" placeholder="အကြောင်းအရာ" style="width: 100%; margin-top: 10px; padding: 10px;" required>
+                
+                <select id="method" onchange="toggleBankNameInput()" style="width: 100%; margin-top: 10px; padding: 10px;">
                     <option value="Banking">🏦 Banking (ဘဏ် / Kpay)</option>
                     <option value="Cash">💵 Cash (လက်ငင်းငွေသား)</option>
                 </select>
-                <select id="bank-select" onchange="toggleCustomBankInput()">
+                
+                <select id="bank-select" onchange="toggleCustomBankInput()" style="width: 100%; margin-top: 10px; padding: 10px;">
                     <option value="Kpay">KBZ Pay</option>
-                    <option value="Wavepay">Wave Pay</option>
-                    <option value="AYAPay">AYA Pay</option>
+                    <option value="Wavepay">Wave Pay</option><option value="AYAPay">AYA Pay</option>
                     <option value="CBPay">CB Pay</option>
                     <option value="KBZ Bank">KBZ Bank</option>
                     <option value="CB Bank">CB Bank</option>
                     <option value="Other">အခြားဘဏ်နာမည် ရေးမည်...</option>
                 </select>
-                <input type="text" id="custom-bank-name" placeholder="ဘဏ်နာမည် ရိုက်ထည့်ပါ" style="display: none; margin-top: 10px;">
+                <input type="text" id="custom-bank-name" placeholder="ဘဏ်နာမည် ရိုက်ထည့်ပါ" style="display: none; width: 100%; margin-top: 10px; padding: 10px;">
+                
                 <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <button onclick="addTransaction('ဝင်ငွေ')" style="background: #27ae60; flex: 1;">➕ ဝင်ငွေထည့်မည်</button>
-                    <button onclick="addTransaction('ထွက်ငွေ')" style="background: #e74c3c; flex: 1;">➖ ထွက်ငွေထည့်မည်</button>
+                    <button onclick="addTransaction('ဝင်ငွေ')" style="background: #27ae60; color: white; border: none; padding: 12px; flex: 1; border-radius: 6px; font-weight: bold; cursor: pointer;">➕ ဝင်ငွေထည့်မည်</button>
+                    <button onclick="addTransaction('ထွက်ငွေ')" style="background: #e74c3c; color: white; border: none; padding: 12px; flex: 1; border-radius: 6px; font-weight: bold; cursor: pointer;">➖ ထွက်ငွေထည့်မည်</button>
                 </div>
             </div>
 
-            <div class="card">
-                <h3>📋 စာရင်းမှတ်တမ်းများ</h3>
-                <ul id="transaction-list" class="tx-list"></ul>
+            <div id="admin-panel" class="card" style="display: none; margin-top: 15px; border: 2px solid #3498db;">
+                <h3 style="color: #3498db; margin-bottom: 10px;">👥 ဝန်ထမ်း (User) အသစ်တိုးခြင်း (Admin Only)</h3>
+                <input type="tel" id="new-user-phone" placeholder="ဝန်ထမ်း ဖုန်းနံပါတ် အသစ်" style="width: 100%; padding: 10px;">
+                <input type="password" id="new-user-pass" placeholder="ဝန်ထမ်း ဝင်ခွင့်ကုဒ် (Password)" style="width: 100%; margin-top: 10px; padding: 10px;">
+                <button onclick="registerNewUserByAdmin()" style="background: #3498db; color: white; border: none; width: 100%; padding: 12px; margin-top: 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">➕ ဝန်ထမ်းအကောင့် ဆောက်မည်</button>
             </div>
-        </div> 
-    </div> 
 
-    <script src="config.js"></script>
+            <div class="card" style="margin-top: 15px;">
+                <h3>📋 စာရင်းမှတ်တမ်းများ</h3>
+                <ul id="transaction-list" class="tx-list" style="list-style: none; padding: 0; margin-top: 10px;"></ul>
+            </div>
+
+        </div> </div> <script src="config.js"></script>
     <script src="auth.js"></script>
     <script src="transactions.js"></script>
     <script src="ui.js"></script>
