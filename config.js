@@ -1,5 +1,5 @@
 // config.js - Global Variables & Standard Network Setup
-const google_script_url = "https://script.google.com/macros/s/AKfycbzzyAlHIM950G1nbZFLviiyYAjOFMcTpTdHomraP_o0-ay8tMWa_3nVNbK52FInS8Ts/exec"; 
+const google_script_url = "https://script.google.com/macros/s/AKfycbw-VP6_XJYzYTtVl1-WlD0vm3vIsLa8iArTN7AhNCwKo-idX6EnebfaF3sBgSs2p4bJSA/exec"; 
 
 let current_user_key = localStorage.getItem('logged_user_key') || "";
 let current_acc_type = localStorage.getItem('logged_acc_type') || "";
