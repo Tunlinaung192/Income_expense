@@ -1,4 +1,5 @@
 // transactions.js - Insert, Delete and Server Synchronization logic
+
 function addTransaction(type) {
     let amountInput = document.getElementById('amount').value.trim();
     const descInput = document.getElementById('description').value.trim();
@@ -16,7 +17,7 @@ function addTransaction(type) {
     const now = new Date();
     const newTx = {
         id: now.getTime().toString(),
-        accType: current_acc_type,
+        accType: current_acc_type || "Admin",
         type: type,
         amount: parseFloat(amountInput),
         description: descInput,
@@ -26,26 +27,33 @@ function addTransaction(type) {
         bankName: bankNameInput
     };
 
+    // 1. မျက်နှာပြင်မှာ ချက်ချင်း စာရင်းတိုးပြလိုက်ခြင်း (အော့ဖ်လိုင်းစနစ်)
     transactions.unshift(newTx);
     saveLocalState();
     render();
     
+    // 2. Google Sheet ဆီသို့ နောက်ကွယ်မှ လှမ်းပို့ခြင်း
     if (navigator.onLine) {
         fetch(google_script_url, {
             method: "POST",
+            mode: "no-cors", // ဖုန်းတွေမှာ စာရင်းသွင်းရင် ကန့်သတ်ချက်မရှိအောင် no-cors ပြောင်းထားပါတယ်
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ action: "add", userKey: current_user_key, ...newTx })
         })
-        .then(res => res.json())
-        .then(resData => {
-            if(resData.status !== "success") { transactions = transactions.filter(t => t.id !== newTx.id); alert(resData.message); }
-            saveLocalState(); render();
+        .then(() => {
+            // no-cors ကြောင့် ဒေတာဝင်သွားပြီးနောက် နောက်ဆုံးစာရင်းကို Sheet ဆီက ပြန်ဆွဲယူမည်
+            setTimeout(fetchDataFromGoogleSheets, 1500);
         })
-        .catch(() => { unsynced_items.push(newTx); saveLocalState(); });
+        .catch(() => { 
+            unsynced_items.push(newTx); 
+            saveLocalState(); 
+        });
     } else {
         unsynced_items.push(newTx);
         saveLocalState();
     }
 
+    // Input များကို ပြန်ရှင်းထုတ်ခြင်း
     document.getElementById('amount').value = "";
     document.getElementById('description').value = "";
 }
@@ -87,12 +95,14 @@ function deleteTransaction(id) {
 }
 
 function fetchDataFromGoogleSheets() {
-    if (!navigator.onLine) return;
+    if (!navigator.onLine || !current_user_key) return;
     fetch(`${google_script_url}?userKey=${current_user_key}&accType=${current_acc_type}`)
     .then(res => res.json())
     .then(data => {
-        if (unsynced_items.length === 0 && pending_deletes.length === 0 && data) { 
-            transactions = data.reverse(); saveLocalState(); render(); 
+        if (unsynced_items.length === 0 && pending_deletes.length === 0 && data && data.length > 0) { 
+            transactions = data.reverse(); 
+            saveLocalState(); 
+            render(); 
         }
     }).catch(e => console.log(e));
 }
@@ -106,15 +116,17 @@ function syncOfflineDataToGoogle() {
                 method: "POST",
                 body: JSON.stringify({ action: "delete", id: delItem.id, adminPassword: delItem.adminPassword })
             }).then(res => res.json());
-        });Promise.all(deletePromises).then(() => { pending_deletes = []; saveLocalState(); });
+        });
+        Promise.all(deletePromises).then(() => { pending_deletes = []; saveLocalState(); });
     }
 
     if (unsynced_items.length > 0) {
         let addPromises = unsynced_items.map(item => {
             return fetch(google_script_url, {
                 method: "POST",
+                mode: "no-cors",
                 body: JSON.stringify({ action: "add", userKey: current_user_key, ...item })
-            }).then(res => res.json());
+            });
         });
         Promise.all(addPromises).then(() => { unsynced_items = []; saveLocalState(); fetchDataFromGoogleSheets(); });
     }
