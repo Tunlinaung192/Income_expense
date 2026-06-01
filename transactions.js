@@ -1,4 +1,4 @@
-// transactions.js - Data Insert & Sync
+// transactions.js - Data Insert & Sync (GET Query Mode)
 function addTransaction(type) {
     let amountInput = document.getElementById('amount').value.trim();
     const descInput = document.getElementById('description').value.trim();
@@ -30,26 +30,20 @@ function addTransaction(type) {
     localStorage.setItem(`off_tx_${current_user_key}`, JSON.stringify(transactions));
     render();
 
-    // ၂။ Google Sheet သို့ ပုံစံမှန် URLSearchParams စနစ်ဖြင့် လှမ်းပို့ခြင်း
+    // ၂။ Google Sheet သို့ လုံခြုံရေးအပိတ်အဆို့မရှိသော GET လမ်းကြောင်းဖြင့် ပို့ခြင်း
     if (navigator.onLine) {
-        const formPayload = new URLSearchParams();
-        formPayload.append("action", "add");
-        formPayload.append("userKey", current_user_key);
-        
-        // သတ်မှတ်ချက်များကို တစ်ခုချင်းစီ ထည့်သွင်းခြင်း
-        Object.keys(newTx).forEach(key => {
-            formPayload.append(key, newTx[key]);
-        });
+        const queryString = new URLSearchParams({
+            action: "add",
+            userKey: current_user_key,
+            ...newTx
+        }).toString();
 
-        fetch(google_script_url, {
-            method: "POST",
-            mode: "no-cors", 
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: formPayload
-        })
-        .then(() => {
-            console.log("စာရင်းကို Google Sheet သို့ အောင်မြင်စွာ ပို့ပြီးပါပြီ။");
-            // စာရင်းအသစ်များကို Google Sheet ထံမှ ၁ စက္ကန့်အကြာတွင် ပြန်လည် Update ဆွဲယူမည်
+        // fetch ဖြင့် Google ဆီသို့ တိုက်ရိုက် လှမ်းခေါ်လိုက်ခြင်း
+        fetch(`${google_script_url}?${queryString}`)
+        .then(res => res.json())
+        .then(resData => {
+            console.log("Response from Google:", resData);
+            // စာရင်းအသစ်များကို ၁.၅ စက္ကန့်အကြာတွင် Sheet ဆီကနေ ပြန်လည် ဆွဲယူမည်
             setTimeout(fetchDataFromGoogleSheets, 1500);
         })
         .catch(err => console.log("Network Sync Error:", err));
@@ -69,7 +63,7 @@ function deleteTransaction(id) {
 
 function fetchDataFromGoogleSheets() {
     if (!navigator.onLine || !current_user_key) return;
-    fetch(`${google_script_url}?userKey=${current_user_key}&accType=Admin`)
+    fetch(`${google_script_url}?action=fetch&userKey=${current_user_key}`)
     .then(res => res.json())
     .then(data => {
         if (data && data.length > 0) { 
