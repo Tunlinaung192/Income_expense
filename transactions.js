@@ -1,5 +1,4 @@
-// transactions.js - Insert, Delete and Server Synchronization logic
-
+// transactions.js - Data Insert & Sync
 function addTransaction(type) {
     let amountInput = document.getElementById('amount').value.trim();
     const descInput = document.getElementById('description').value.trim();
@@ -10,14 +9,13 @@ function addTransaction(type) {
     if (methodInput === "Banking") {
         const bankSelect = document.getElementById('bank-select').value;
         bankNameInput = (bankSelect === "Other") ? document.getElementById('custom-bank-name').value.trim() : bankSelect;
-        if (!bankNameInput) { alert("❌ ဘဏ်နာမည် ထည့်ပါ!"); return; }
     }
-    if (!amountInput || !descInput) { alert("❌ ပမာဏနှင့် အကြောင်းအရာ ဖြည့်ပါ!"); return; }
+    if (!amountInput || !descInput) { alert("❌ ဖြည့်စွက်ပေးပါ"); return; }
 
     const now = new Date();
     const newTx = {
         id: now.getTime().toString(),
-        accType: current_acc_type || "Admin",
+        accType: "Admin",
         type: type,
         amount: parseFloat(amountInput),
         description: descInput,
@@ -27,113 +25,48 @@ function addTransaction(type) {
         bankName: bankNameInput
     };
 
-    // 1. မျက်နှာပြင်မှာ ချက်ချင်း စာရင်းတိုးပြလိုက်ခြင်း (အော့ဖ်လိုင်းစနစ်)
+    // ဖုန်းမျက်နှာပြင်ပေါ်တွင် ချက်ချင်းစာရင်းတိုးပြမည်
     transactions.unshift(newTx);
-    saveLocalState();
+    localStorage.setItem(`off_tx_${current_user_key}`, JSON.stringify(transactions));
     render();
-    
-    // 2. Google Sheet ဆီသို့ နောက်ကွယ်မှ လှမ်းပို့ခြင်း
+
+    // Google Sheet သို့ ဒေတာလှမ်းပို့ခြင်း (ဖုန်းအတွက် အကောင်းဆုံး Parameters စနစ်)
     if (navigator.onLine) {
+        const urlParams = new URLSearchParams();
+        urlParams.append("action", "add");
+        urlParams.append("userKey", current_user_key);
+        Object.keys(newTx).forEach(key => urlParams.append(key, newTx[key]));
+
         fetch(google_script_url, {
             method: "POST",
-            mode: "no-cors", // ဖုန်းတွေမှာ စာရင်းသွင်းရင် ကန့်သတ်ချက်မရှိအောင် no-cors ပြောင်းထားပါတယ်
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "add", userKey: current_user_key, ...newTx })
-        })
-        .then(() => {
-            // no-cors ကြောင့် ဒေတာဝင်သွားပြီးနောက် နောက်ဆုံးစာရင်းကို Sheet ဆီက ပြန်ဆွဲယူမည်
-            setTimeout(fetchDataFromGoogleSheets, 1500);
-        })
-        .catch(() => { 
-            unsynced_items.push(newTx); 
-            saveLocalState(); 
-        });
-    } else {
-        unsynced_items.push(newTx);
-        saveLocalState();
+            mode: "no-cors", // ⚠️ CORS Security အား ကျော်ဖြတ်ရန် မဖြစ်မနေ သုံးရပါမည်
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: urlParams
+        }).then(() => {
+            console.log("Data Sent to Google Sheet!");
+        }).catch(err => console.log("Sync Error:", err));
     }
 
-    // Input များကို ပြန်ရှင်းထုတ်ခြင်း
     document.getElementById('amount').value = "";
     document.getElementById('description').value = "";
 }
 
 function deleteTransaction(id) {
-    let deletePass = prompt("🔑 ဤစာရင်းမှတ်တမ်းအား ဖြတ်ပစ်ရန် Admin Password ကို ရိုက်ထည့်ပါ:");
-    if (deletePass === null) return; 
-    
-    deletePass = convertMyanmarToEnglishDigits(deletePass.trim());
-    if (!deletePass) { alert("❌ အတည်ပြုချက် Password လိုအပ်ပါသည်!"); return; }
-
-    const backupTx = [...transactions];
     transactions = transactions.filter(t => t.id.toString() !== id.toString());
-    saveLocalState(); render();
-
-    if (navigator.onLine) {
-        fetch(google_script_url, {
-            method: "POST",
-            body: JSON.stringify({ action: "delete", id: id, adminPassword: deletePass })
-        })
-        .then(res => res.json())
-        .then(response => {
-            if (response.status !== "success") { 
-                alert(response.message); 
-                transactions = backupTx; 
-                saveLocalState(); render();
-            } else {
-                alert("🎉 စာရင်းဖျက်သိမ်းပြီးပါပြီ။");
-            }
-        })
-        .catch(() => { 
-            pending_deletes.push({ id: id, adminPassword: deletePass }); 
-            saveLocalState(); 
-        });
-    } else {
-        pending_deletes.push({ id: id, adminPassword: deletePass });
-        saveLocalState();
-    }
+    localStorage.setItem(`off_tx_${current_user_key}`, JSON.stringify(transactions));
+    render();
+    alert("စာရင်းကို ဖုန်းထဲမှ ဖျက်ပြီးပါပြီ။");
 }
 
 function fetchDataFromGoogleSheets() {
     if (!navigator.onLine || !current_user_key) return;
-    fetch(`${google_script_url}?userKey=${current_user_key}&accType=${current_acc_type}`)
+    fetch(`${google_script_url}?userKey=${current_user_key}&accType=Admin`)
     .then(res => res.json())
     .then(data => {
-        if (unsynced_items.length === 0 && pending_deletes.length === 0 && data && data.length > 0) { 
+        if (data && data.length > 0) { 
             transactions = data.reverse(); 
-            saveLocalState(); 
+            localStorage.setItem(`off_tx_${current_user_key}`, JSON.stringify(transactions));
             render(); 
         }
-    }).catch(e => console.log(e));
-}
-
-function syncOfflineDataToGoogle() {
-    if (!navigator.onLine) return;
-    
-    if (pending_deletes.length > 0) {
-        let deletePromises = pending_deletes.map(delItem => {
-            return fetch(google_script_url, {
-                method: "POST",
-                body: JSON.stringify({ action: "delete", id: delItem.id, adminPassword: delItem.adminPassword })
-            }).then(res => res.json());
-        });
-        Promise.all(deletePromises).then(() => { pending_deletes = []; saveLocalState(); });
-    }
-
-    if (unsynced_items.length > 0) {
-        let addPromises = unsynced_items.map(item => {
-            return fetch(google_script_url, {
-                method: "POST",
-                mode: "no-cors",
-                body: JSON.stringify({ action: "add", userKey: current_user_key, ...item })
-            });
-        });
-        Promise.all(addPromises).then(() => { unsynced_items = []; saveLocalState(); fetchDataFromGoogleSheets(); });
-    }
-}
-
-function saveLocalState() {
-    localStorage.setItem(`off_tx_${current_user_key}`, JSON.stringify(transactions));
-    localStorage.setItem(`un_syn_${current_user_key}`, JSON.stringify(unsynced_items));
-    localStorage.setItem(`pen_del_${current_user_key}`, JSON.stringify(pending_deletes));
+    }).catch(e => console.log("Fetch Error:", e));
 }
