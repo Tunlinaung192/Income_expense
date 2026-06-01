@@ -10,7 +10,7 @@ function addTransaction(type) {
         const bankSelect = document.getElementById('bank-select').value;
         bankNameInput = (bankSelect === "Other") ? document.getElementById('custom-bank-name').value.trim() : bankSelect;
     }
-    if (!amountInput || !descInput) { alert("❌ ဖြည့်စွက်ပေးပါ"); return; }
+    if (!amountInput || !descInput) { alert("❌ ပမာဏနှင့် အကြောင်းအရာ ဖြည့်စွက်ပေးပါ"); return; }
 
     const now = new Date();
     const newTx = {
@@ -25,28 +25,37 @@ function addTransaction(type) {
         bankName: bankNameInput
     };
 
-    // ဖုန်းမျက်နှာပြင်ပေါ်တွင် ချက်ချင်းစာရင်းတိုးပြမည်
+    // ၁။ ဖုန်းမျက်နှာပြင်ပေါ်တွင် စာရင်းကို ချက်ချင်းတိုးပြမည် (Offline First)
     transactions.unshift(newTx);
     localStorage.setItem(`off_tx_${current_user_key}`, JSON.stringify(transactions));
     render();
 
-    // Google Sheet သို့ ဒေတာလှမ်းပို့ခြင်း (ဖုန်းအတွက် အကောင်းဆုံး Parameters စနစ်)
+    // ၂။ Google Sheet သို့ ပုံစံမှန် URLSearchParams စနစ်ဖြင့် လှမ်းပို့ခြင်း
     if (navigator.onLine) {
-        const urlParams = new URLSearchParams();
-        urlParams.append("action", "add");
-        urlParams.append("userKey", current_user_key);
-        Object.keys(newTx).forEach(key => urlParams.append(key, newTx[key]));
+        const formPayload = new URLSearchParams();
+        formPayload.append("action", "add");
+        formPayload.append("userKey", current_user_key);
+        
+        // သတ်မှတ်ချက်များကို တစ်ခုချင်းစီ ထည့်သွင်းခြင်း
+        Object.keys(newTx).forEach(key => {
+            formPayload.append(key, newTx[key]);
+        });
 
         fetch(google_script_url, {
             method: "POST",
-            mode: "no-cors", // ⚠️ CORS Security အား ကျော်ဖြတ်ရန် မဖြစ်မနေ သုံးရပါမည်
+            mode: "no-cors", 
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: urlParams
-        }).then(() => {
-            console.log("Data Sent to Google Sheet!");
-        }).catch(err => console.log("Sync Error:", err));
+            body: formPayload
+        })
+        .then(() => {
+            console.log("စာရင်းကို Google Sheet သို့ အောင်မြင်စွာ ပို့ပြီးပါပြီ။");
+            // စာရင်းအသစ်များကို Google Sheet ထံမှ ၁ စက္ကန့်အကြာတွင် ပြန်လည် Update ဆွဲယူမည်
+            setTimeout(fetchDataFromGoogleSheets, 1500);
+        })
+        .catch(err => console.log("Network Sync Error:", err));
     }
 
+    // Input Box များကို ပြန်ရှင်းထုတ်ခြင်း
     document.getElementById('amount').value = "";
     document.getElementById('description').value = "";
 }
