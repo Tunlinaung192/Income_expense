@@ -1,4 +1,27 @@
-// ui.js - Render Dashboard Data & List Display with Live Filter Search
+// ui.js - Render Dashboard Data & List Display with Live Filter & Method Tab Search
+
+// စာရင်းစစ်ထုတ်မည့်အခြေအနေအား သိမ်းဆည်းရန် Global Variable (All, Banking, Cash)
+let activeMethodFilter = "All";
+
+function changeMethodFilter(filterType) {
+    activeMethodFilter = filterType;
+    
+    // ခလုတ်များ၏ အရောင်အသွေး (Active State) ကို လဲလှယ်ခြင်း
+    const btnAll = document.getElementById('filter-all-btn');
+    const btnBank = document.getElementById('filter-banking-btn');
+    const btnCash = document.getElementById('filter-cash-btn');
+    
+    if(btnAll) btnAll.classList.remove('active');
+    if(btnBank) btnBank.classList.remove('active');
+    if(btnCash) btnCash.classList.remove('active');
+    
+    if (filterType === 'All' && btnAll) btnAll.classList.add('active');
+    if (filterType === 'Banking' && btnBank) btnBank.classList.add('active');
+    if (filterType === 'Cash' && btnCash) btnCash.classList.add('active');
+    
+    // UI အား ပြန်လည်ဆွဲတင်ခြင်း
+    render();
+}
 
 function render() {
     const listEl = document.getElementById('transaction-list');
@@ -41,12 +64,12 @@ function render() {
 
     if (netEl) netEl.innerText = `${netBal.toLocaleString()} ကျပ်`;
     if (incEl) incEl.innerText = `${totalInc.toLocaleString()} ကျပ်`;
-    if (expEl) expExp = expEl.innerText = `${totalExp.toLocaleString()} ကျပ်`;
+    if (expEl) expEl.innerText = `${totalExp.toLocaleString()} ကျပ်`;
     if (combEl) combEl.innerText = `${combinedBal.toLocaleString()} ကျပ်`;
     if (bnkEl) bnkEl.innerText = `${bankBal.toLocaleString()} ကျပ်`;
     if (cshEl) cshEl.innerText = `${cashBal.toLocaleString()} ကျပ်`;
 
-    // 🔍 ၂။ စာရင်းများကို အောက်ခြေစာရင်းပုံးထဲ ထည့်သွင်းပြသခြင်း (Search Filter နှင့် ကိုက်ညီသည်များကိုသာ ပြသမည်)
+    // 🔍 ၂။ စာရင်းများကို အောက်ခြေစာရင်းပုံးထဲ ထည့်သွင်းပြသခြင်း (Method နှင့် Search Filter ပါ တွဲစစ်မည်)
     transactions.forEach(tx => {
         const tId = tx.id || "";
         const tUser = tx.userKey || "";
@@ -59,18 +82,20 @@ function render() {
         const tMethod = tx.method || "";
         const tBank = tx.bankName || "";
 
-        // ရှာဖွေမှု စည်းမျဉ်းသတ်မှတ်ခြင်း (အကြောင်းအရာ၊ ဖုန်းနံပါတ် သို့မဟုတ် ဘဏ်နာမည် တစ်ခုခုကို ရှာနိုင်သည်)
+        // 🌟 ဝင်ငွေ/ထွက်ငွေ ပုံစံ ခွဲခြားစစ်ထုတ်ခြင်း (Banking သို့မဟုတ် Cash)
+        if (activeMethodFilter !== "All" && tMethod !== activeMethodFilter) {
+            return; // ရွေးချယ်ထားတဲ့ ပုံစံနဲ့ မကိုက်ညီပါက ကျော်သွားမည်
+        }
+
+        // စာသားဖြင့် ထပ်ဆင့်ရှာဖွေမှု စည်းမျဉ်းသတ်မှတ်ခြင်း
         const matchDesc = tDesc.toLowerCase().includes(searchQuery);
         const matchUser = tUser.toLowerCase().includes(searchQuery);
         const matchBank = tBank.toLowerCase().includes(searchQuery);
         const matchRole = tRole.toLowerCase().includes(searchQuery);
 
-        // အကယ်၍ ရှာဖွေမှုစာသား ဖြည့်ထားပြီး ကိုက်ညီမှုမရှိပါက ဤစာရင်းအား ကျော်သွားမည် (မပြပါ)
         if (searchQuery && !matchDesc && !matchUser && !matchBank && !matchRole) {
             return; 
-        }
-
-        const li = document.createElement('li');
+        }const li = document.createElement('li');
         li.className = `tx-item ${tType === 'ဝင်ငွေ' ? 'border-inc' : 'border-exp'}`;
         li.style.borderLeft = tType === 'ဝင်ငွေ' ? "5px solid #27ae60" : "5px solid #e74c3c";
         li.style.background = "#fff";
@@ -82,14 +107,14 @@ function render() {
         li.style.justifyContent = "space-between";
         li.style.alignItems = "center";
 
-        // Admin ဖြစ်ပါက မည်သည့်ဝန်ထမ်း (Phone Number) သွင်းသည်ကိုပါ ပြသပေးမည်
         let userBadge = "";
         if (current_acc_type === "Admin") {
             userBadge = `<br><span style="font-size:11px; background:#ebf5fb; color:#2980b9; padding:2px 4px; border-radius:3px; font-weight:bold;">📱 ThwinThu: ${tUser} (${tRole})</span>`;
         }
 
         li.innerHTML = `
-            <div><span style="font-weight:bold; color:#2c3e50;">${tDesc}</span> ${userBadge}
+            <div>
+                <span style="font-weight:bold; color:#2c3e50;">${tDesc}</span> ${userBadge}
                 <div style="font-size:11px; color:#7f8c8d; margin-top:4px;">
                     📅 ${tDate} (${tTime}) | 🏦 ${tMethod === 'Banking' ? tBank : 'လက်ငင်းငွေသား'}
                 </div>
