@@ -1,6 +1,5 @@
-// ui.js - Render Dashboard Data & List Display with Live Filter & Method Tab Search
+// ui.js - Render Dashboard Data & List Display with Live Filter & Method Tab & Bank Dropdown Filter
 
-// စာရင်းစစ်ထုတ်မည့်အခြေအနေအား သိမ်းဆည်းရန် Global Variable (All, Banking, Cash)
 let activeMethodFilter = "All";
 
 function changeMethodFilter(filterType) {
@@ -10,6 +9,7 @@ function changeMethodFilter(filterType) {
     const btnAll = document.getElementById('filter-all-btn');
     const btnBank = document.getElementById('filter-banking-btn');
     const btnCash = document.getElementById('filter-cash-btn');
+    const bankFilterSelect = document.getElementById('bank-filter-select');
     
     if(btnAll) btnAll.classList.remove('active');
     if(btnBank) btnBank.classList.remove('active');
@@ -18,6 +18,16 @@ function changeMethodFilter(filterType) {
     if (filterType === 'All' && btnAll) btnAll.classList.add('active');
     if (filterType === 'Banking' && btnBank) btnBank.classList.add('active');
     if (filterType === 'Cash' && btnCash) btnCash.classList.add('active');
+    
+    // 🌟 [အသစ်ထည့်သွင်းမှု] Banking သီးသန့်ခလုတ်နှိပ်လျှင် Dropdown အား ပြသပြီး ကျန်ခလုတ်များတွင် ဖျောက်ထားမည်
+    if (bankFilterSelect) {
+        if (filterType === "Banking") {
+            bankFilterSelect.style.display = "block";
+            bankFilterSelect.value = "All_Banks"; // ပြန်ဖွင့်တိုင်း အားလုံးကို အရင်ပြရန် Reset လုပ်သည်
+        } else {
+            bankFilterSelect.style.display = "none";
+        }
+    }
     
     // UI အား ပြန်လည်ဆွဲတင်ခြင်း
     render();
@@ -28,9 +38,13 @@ function render() {
     if (!listEl) return;
     listEl.innerHTML = "";
 
-    // 🔍 Search Box ထဲမှ ရိုက်ထားသောစာသားအား ဆွဲယူခြင်း
+    // Search Box ထဲမှ ရိုက်ထားသောစာသားအား ဆွဲယူခြင်း
     const searchSearchEl = document.getElementById('tx-search-input');
     const searchQuery = searchSearchEl ? searchSearchEl.value.trim().toLowerCase() : "";
+
+    // 🌟 ရွေးချယ်ထားသော Bank Filter နာမည်အား ဆွဲယူခြင်း
+    const bankSelectEl = document.getElementById('bank-filter-select');
+    const selectedBankFilter = bankSelectEl ? bankSelectEl.value : "All_Banks";
 
     let totalInc = 0;
     let totalExp = 0;
@@ -69,7 +83,7 @@ function render() {
     if (bnkEl) bnkEl.innerText = `${bankBal.toLocaleString()} ကျပ်`;
     if (cshEl) cshEl.innerText = `${cashBal.toLocaleString()} ကျပ်`;
 
-    // 🔍 ၂။ စာရင်းများကို အောက်ခြေစာရင်းပုံးထဲ ထည့်သွင်းပြသခြင်း (Method နှင့် Search Filter ပါ တွဲစစ်မည်)
+    // 🔍 ၂။ စာရင်းများကို အောက်ခြေစာရင်းပုံးထဲ ထည့်သွင်းပြသခြင်း (Method, Bank Dropdown နှင့် Search စုပေါင်းစစ်ထုတ်မည်)
     transactions.forEach(tx => {
         const tId = tx.id || "";
         const tUser = tx.userKey || "";
@@ -80,11 +94,22 @@ function render() {
         const tDate = tx.date || "";
         const tTime = tx.time || "";
         const tMethod = tx.method || "";
-        const tBank = tx.bankName || "";
-
-        // 🌟 ဝင်ငွေ/ထွက်ငွေ ပုံစံ ခွဲခြားစစ်ထုတ်ခြင်း (Banking သို့မဟုတ် Cash)
+        const tBank = tx.bankName || "";// ကနဦး ဝင်ငွေ/ထွက်ငွေ ပုံစံ စစ်ထုတ်ခြင်း (Banking သို့မဟုတ် Cash)
         if (activeMethodFilter !== "All" && tMethod !== activeMethodFilter) {
-            return; // ရွေးချယ်ထားတဲ့ ပုံစံနဲ့ မကိုက်ညီပါက ကျော်သွားမည်
+            return; 
+        }
+
+        // 🌟 [အသစ်ထည့်သွင်းမှု] Banking စနစ်ထဲတွင် ဘဏ်နာမည်အလိုက် ထပ်ဆင့်စစ်ထုတ်ခြင်း
+        if (activeMethodFilter === "Banking" && selectedBankFilter !== "All_Banks") {
+            // အကယ်၍ Dropdown ထဲတွင် 'Other' ရွေးထားပါက Kpay, Wavepay စသည်တို့ မဟုတ်သော အခြားစာသားများကို စစ်ထုတ်မည်
+            if (selectedBankFilter === "Other") {
+                const knownBanks = ["Kpay", "Wavepay", "AYAPay", "CBPay", "KBZ Bank", "CB Bank"];
+                if (knownBanks.includes(tBank)) {
+                    return; // သတ်မှတ်ထားပြီးသားဘဏ်များဖြစ်ပါက ကျော်သွားမည် (မပြပါ)
+                }
+            } else if (tBank !== selectedBankFilter) {
+                return; // ရွေးချယ်ထားတဲ့ ဘဏ်နာမည်နဲ့ ကွက်တိမကိုက်ညီပါက ကျော်သွားမည်
+            }
         }
 
         // စာသားဖြင့် ထပ်ဆင့်ရှာဖွေမှု စည်းမျဉ်းသတ်မှတ်ခြင်း
@@ -95,7 +120,9 @@ function render() {
 
         if (searchQuery && !matchDesc && !matchUser && !matchBank && !matchRole) {
             return; 
-        }const li = document.createElement('li');
+        }
+
+        const li = document.createElement('li');
         li.className = `tx-item ${tType === 'ဝင်ငွေ' ? 'border-inc' : 'border-exp'}`;
         li.style.borderLeft = tType === 'ဝင်ငွေ' ? "5px solid #27ae60" : "5px solid #e74c3c";
         li.style.background = "#fff";
@@ -155,6 +182,5 @@ function convertMyanmarToEnglishDigits(input) {
     for (let i = 0; i < 10; i++) {
         const regex = new RegExp(mmNumbers[i], 'g');
         output = output.replace(regex, i.toString());
-    }
-    return output;
+    }return output;
 }
