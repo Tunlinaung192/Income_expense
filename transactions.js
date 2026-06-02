@@ -26,12 +26,10 @@ function addTransaction(type) {
         bankName: bankNameInput
     };
 
-    // ၁။ ဖုန်းမျက်နှာပြင်ပေါ်တွင် စာရင်းကို ချက်ချင်းတိုးပြမည် (Offline First စနစ်)
     transactions.unshift(newTx);
     localStorage.setItem(`off_tx_${current_user_key}`, JSON.stringify(transactions));
     render();
 
-    // ၂။ Google Sheet သို့ ပို့ခြင်း
     if (navigator.onLine) {
         const formPayload = new URLSearchParams();
         formPayload.append("action", "add");
@@ -42,12 +40,10 @@ function addTransaction(type) {
         fetch(google_script_url, {
             method: "POST",
             mode: "no-cors",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: formPayload
         })
         .then(() => {
-            console.log("Sent to Server");
-            setTimeout(fetchDataFromGoogleSheets, 2000); // သွင်းပြီး ၂ စက္ကန့်အကြာတွင် နောက်ဆုံးအခြေအနေကို ဆွဲယူမည်
+            setTimeout(fetchDataFromGoogleSheets, 2000);
         })
         .catch(err => console.log(err));
     }
@@ -62,17 +58,17 @@ function deleteTransaction(id) {
     deletePass = convertMyanmarToEnglishDigits(deletePass.trim());
 
     if (navigator.onLine) {
-        const formPayload = new URLSearchParams();
-        formPayload.append("action", "delete");
-        formPayload.append("id", id);
-        formPayload.append("adminPassword", deletePass);
-
-        fetch(google_script_url, {
-            method: "POST",
-            mode: "no-cors",
-            body: formPayload
-        }).then(() => {
-            alert("🎉 ဖျက်သိမ်းပြီးပါပြီ (Server သို့ လှမ်းပို့ပြီး)");
+        fetch(`${google_script_url}?action=delete&id=${id}&currentAdminPhone=${current_user_key}&adminPassword=${deletePass}`)
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === "success") {
+                alert("🎉 စာရင်းအား အောင်မြင်စွာ ဖျက်သိမ်းပြီးပါပြီ။");
+                setTimeout(fetchDataFromGoogleSheets, 1000);
+            } else {
+                alert(data.message || "❌ ဖျက်၍မရပါ။");
+            }
+        }).catch(() => {
+            // mode: no-cors သုံးထားပါက သီးသန့် alert ထပ်မပြစေရန်
             setTimeout(fetchDataFromGoogleSheets, 1500);
         });
     } else {
@@ -80,7 +76,6 @@ function deleteTransaction(id) {
     }
 }
 
-// 🔄 Google Sheet မှ ဒေတာများကို ဆွဲယူပြီး App ထဲသို့ ပြန်ထည့်ပေးမည့် စနစ်
 function fetchDataFromGoogleSheets() {
     if (!navigator.onLine || !current_user_key) return;
     
@@ -88,17 +83,15 @@ function fetchDataFromGoogleSheets() {
     .then(res => res.json())
     .then(data => {
         if (data && Array.isArray(data)) { 
-            // Google Sheet က ဒေတာတွေကို အဆင်လိုက်ဖြစ်အောင် လုပ်ပြီး သိမ်းဆည်းခြင်း
             transactions = data.reverse(); 
             localStorage.setItem(`off_tx_${current_user_key}`, JSON.stringify(transactions));
             render(); 
-            console.log("Sheet ဒေတာများနှင့် အောင်မြင်စွာ Sync ပြုလုပ်ပြီးပါပြီ။");
         }
     }).catch(e => console.log("Sync Error:", e));
 }
 
-// ⏰ [အော်တိုဒေတာ Sync စနစ်] စက္ကန့် ၃၀ လျှင် တစ်ကြိမ် Google Sheet ဆီကနေ ဒေတာအသစ်များကို အလိုအလျောက် ဆွဲယူမည်
 setInterval(() => {
     if (current_user_key && navigator.onLine) {
         fetchDataFromGoogleSheets();
-    }}, 30000); // 30000 ms = စက္ကန့် ၃၀
+    }
+}, 30000);
