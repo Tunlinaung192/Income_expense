@@ -29,14 +29,21 @@
             </div>
 
             <div class="card balance-card">
-                <h3>💰 စုစုပေါင်းလက်ကျန်ငွေ</h3>
+                <h3>💰 စုစုပေါင်းလက်ကျန်ငွေ (စာရင်းချုပ်)</h3>
                 <h1 id="net-balance" style="font-size: 32px; color: #2c3e50; margin: 10px 0;">0 ကျပ်</h1>
+                
                 <div class="balance-row" style="display: flex; justify-content: space-between; gap: 10px;">
                     <div style="flex: 1; background: #eafaf1; padding: 10px; border-radius: 6px;">🔺 ဝင်ငွေစုစုပေါင်း:<br><span id="total-income" class="text-inc" style="font-weight: bold; color: #27ae60;">0 ကျပ်</span></div>
                     <div style="flex: 1; background: #fdedec; padding: 10px; border-radius: 6px;">🔻 ထွက်ငွေစုစုပေါင်း:<br><span id="total-expense" class="text-exp" style="font-weight: bold; color: #e74c3c;">0 ကျပ်</span></div>
                 </div>
-                <div class="balance-row" style="margin-top: 12px; border-top: 1px dashed #ddd; padding-top: 10px; display: flex; justify-content: space-between; gap: 10px;">
-                    <div style="flex: 1;"> Romano 🏦 ဘဏ်လက်ကျန်:<br><span id="banking-balance" style="font-weight: bold; color:#3498db;">0 ကျပ်</span></div>
+                
+                <div style="margin-top: 15px; background: #ebf5fb; padding: 12px; border-radius: 6px; text-align: center; border: 1px dashed #3498db;">
+                    <span style="font-size: 14px; color: #2c3e50; font-weight: bold;">📊 လက်ရှိလက်ကျန် နှစ်ခုပေါင်း (ဘဏ် + ငွေသား)</span><br>
+                    <span id="combined-balance" style="font-size: 22px; font-weight: bold; color: #2980b9;">0 ကျပ်</span>
+                </div>
+
+                <div class="balance-row" style="margin-top: 12px; border-top: 1px dashed #ddd; padding-top: 10px; display: flex; justify-content: space-between; gap: 10px; font-size: 14px;">
+                    <div style="flex: 1;">🏦 ဘဏ်လက်ကျန်:<br><span id="banking-balance" style="font-weight: bold; color:#3498db;">0 ကျပ်</span></div>
                     <div style="flex: 1;">💵 လက်ငင်းလက်ကျန်:<br><span id="cash-balance" style="font-weight: bold; color:#f39c12;">0 ကျပ်</span></div>
                 </div>
             </div>
@@ -46,14 +53,14 @@
                 <input type="number" id="amount" placeholder="ပမာဏ (ကျပ်)" inputmode="numeric" style="width: 100%; margin-top: 10px; padding: 10px;" required>
                 <input type="text" id="description" placeholder="အကြောင်းအရာ" style="width: 100%; margin-top: 10px; padding: 10px;" required>
                 
-                <select id="method" onchange="toggleBankNameInput()" style="width: 100%; margin-top: 10px; padding: 10px;">
-                    <option value="Banking">🏦 Banking (ဘဏ် / Kpay)</option>
+                <select id="method" onchange="toggleBankNameInput()" style="width: 100%; margin-top: 10px; padding: 10px;"><option value="Banking">🏦 Banking (ဘဏ် / Kpay)</option>
                     <option value="Cash">💵 Cash (လက်ငင်းငွေသား)</option>
                 </select>
                 
                 <select id="bank-select" onchange="toggleCustomBankInput()" style="width: 100%; margin-top: 10px; padding: 10px;">
                     <option value="Kpay">KBZ Pay</option>
-                    <option value="Wavepay">Wave Pay</option><option value="AYAPay">AYA Pay</option>
+                    <option value="Wavepay">Wave Pay</option>
+                    <option value="AYAPay">AYA Pay</option>
                     <option value="CBPay">CB Pay</option>
                     <option value="KBZ Bank">KBZ Bank</option>
                     <option value="CB Bank">CB Bank</option>
