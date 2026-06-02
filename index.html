@@ -22,7 +22,6 @@
             font-size: 14px;
             box-sizing: border-box;
         }
-        /* Filter ခလုတ်များအတွက် ဒီဇိုင်းလှလှလေး */
         .filter-buttons {
             display: flex;
             gap: 8px;
@@ -44,6 +43,18 @@
             background: #3498db;
             color: white;
             border-color: #3498db;
+        }
+        /* 🌟 ဘဏ် Filter Dropdown အတွက် စတိုင်လ် */
+        .bank-filter-select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #2ecc71;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 12px;
+            background-color: #fafffa;
+            color: #2c3e50;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -76,10 +87,9 @@
                 <div class="balance-row" style="display: flex; justify-content: space-between; gap: 10px;">
                     <div style="flex: 1; background: #eafaf1; padding: 10px; border-radius: 6px;">🔺 ဝင်ငွေစုစုပေါင်း:<br><span id="total-income" class="text-inc" style="font-weight: bold; color: #27ae60;">0 ကျပ်</span></div>
                     <div style="flex: 1; background: #fdedec; padding: 10px; border-radius: 6px;">🔻 ထွက်ငွေစုစုပေါင်း:<br><span id="total-expense" class="text-exp" style="font-weight: bold; color: #e74c3c;">0 ကျပ်</span></div>
-                </div>
-                
-                <div style="margin-top: 15px; background: #ebf5fb; padding: 12px; border-radius: 6px; text-align: center; border: 1px dashed #3498db;">
-                    <span style="font-size: 14px; color: #2c3e50; font-weight: bold;">📊 လက်ရှိလက်ကျန် နှစ်ခုပေါင်း (ဘဏ် + ငွေသား)</span><br><span id="combined-balance" style="font-size: 22px; font-weight: bold; color: #2980b9;">0 ကျပ်</span>
+                </div><div style="margin-top: 15px; background: #ebf5fb; padding: 12px; border-radius: 6px; text-align: center; border: 1px dashed #3498db;">
+                    <span style="font-size: 14px; color: #2c3e50; font-weight: bold;">📊 လက်ရှိလက်ကျန် နှစ်ခုပေါင်း (ဘဏ် + ငွေသား)</span><br>
+                    <span id="combined-balance" style="font-size: 22px; font-weight: bold; color: #2980b9;">0 ကျပ်</span>
                 </div>
 
                 <div class="balance-row" style="margin-top: 12px; border-top: 1px dashed #ddd; padding-top: 10px; display: flex; justify-content: space-between; gap: 10px; font-size: 14px;">
@@ -125,14 +135,25 @@
             <div class="card" style="margin-top: 15px;">
                 <h3>📋 စာရင်းမှတ်တမ်းများ</h3>
                 
-                <div class="search-container">
-                    <input type="text" id="tx-search-input" class="search-input" placeholder="🔍 ရှာလိုသော စာသား/ဖုန်းနံပါတ်/ဘဏ် ဖြည့်ပါ..." oninput="render()">
+                <div class="search-container"><input type="text" id="tx-search-input" class="search-input" placeholder="🔍 ရှာလိုသော စာသား/ဖုန်းနံပါတ်/အကြောင်းအရာ..." oninput="render()">
                 </div>
 
-                <div class="filter-buttons"><button id="filter-all-btn" class="filter-btn active" onclick="changeMethodFilter('All')">🔄 အားလုံးကြည့်မည်</button>
+                <div class="filter-buttons">
+                    <button id="filter-all-btn" class="filter-btn active" onclick="changeMethodFilter('All')">🔄 အားလုံးကြည့်မည်</button>
                     <button id="filter-banking-btn" class="filter-btn" onclick="changeMethodFilter('Banking')">🏦 Banking သီးသန့်</button>
                     <button id="filter-cash-btn" class="filter-btn" onclick="changeMethodFilter('Cash')">💵 Cash သီးသန့်</button>
                 </div>
+
+                <select id="bank-filter-select" class="bank-filter-select" style="display: none;" onchange="render()">
+                    <option value="All_Banks">🏦 ဘဏ်စာရင်းအားလုံး (All Banks)</option>
+                    <option value="Kpay">KBZ Pay</option>
+                    <option value="Wavepay">Wave Pay</option>
+                    <option value="AYAPay">AYA Pay</option>
+                    <option value="CBPay">CB Pay</option>
+                    <option value="KBZ Bank">KBZ Bank</option>
+                    <option value="CB Bank">CB Bank</option>
+                    <option value="Other">အခြားဘဏ်များ (Other)</option>
+                </select>
                 
                 <ul id="transaction-list" class="tx-list" style="list-style: none; padding: 0; margin-top: 10px;"></ul>
             </div>
