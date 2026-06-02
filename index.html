@@ -6,10 +6,9 @@
     <title>ဝင်ငွေ/ထွက်ငွေ စာရင်းစာအုပ်</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Password အကွက်ကို ဖုန်းနံပါတ်ပုံစံပြောင်းစဉ် စာလုံးများအား အစက်အပြောက်ဖြင့် ဖုံးကွယ်ရန် */
         .secure-password-input {
-            -webkit-text-security: disc !important; /* Chrome, Safari, iOS Safari */
-            -text-security: disc !important;         /* Firefox / Others */
+            -webkit-text-security: disc !important;
+            -text-security: disc !important;
         }
     </style>
 </head>
@@ -56,8 +55,8 @@
             </div>
 
             <div class="card form-card" style="margin-top: 15px;">
-                <h3>📝 စာရင်းအသစ်ထည့်ရန်</h3><input type="number" id="amount" placeholder="ပမာဏ (ကျပ်)" inputmode="numeric" style="width: 100%; margin-top: 10px; padding: 10px;" required>
-                <input type="text" id="description" placeholder="အကြောင်းအရာ" style="width: 100%; margin-top: 10px; padding: 10px;" required>
+                <h3>📝 စာရင်းအသစ်ထည့်ရန်</h3>
+                <input type="number" id="amount" placeholder="ပမာဏ (ကျပ်)" inputmode="numeric" style="width: 100%; margin-top: 10px; padding: 10px;" required><input type="text" id="description" placeholder="အကြောင်းအရာ" style="width: 100%; margin-top: 10px; padding: 10px;" required>
                 
                 <select id="method" onchange="toggleBankNameInput()" style="width: 100%; margin-top: 10px; padding: 10px;">
                     <option value="Banking">🏦 Banking (ဘဏ် / Kpay)</option>
@@ -82,7 +81,7 @@
             </div>
 
             <div id="admin-panel" class="card" style="display: none; margin-top: 15px; border: 2px solid #3498db;">
-                <h3 style="color: #3498db; margin-bottom: 10px;">👥 ဝန်ထမ်း (User) အသစ်တိုးခြင်း (Admin Only)</h3>
+                <h3 style="color: #3498db; margin-bottom: 12px;">👥 ဝန်ထမ်းစီမံခန့်ခွဲမှု (Admin Only)</h3>
                 <input type="tel" id="new-user-phone" placeholder="ဝန်ထမ်း ဖုန်းနံပါတ် အသစ်" style="width: 100%; padding: 10px;">
                 <input type="tel" id="new-user-pass" class="secure-password-input" placeholder="ဝန်ထမ်း ဝင်ခွင့်ကုဒ် (ဂဏန်းများသာ)" inputmode="numeric" style="width: 100%; margin-top: 10px; padding: 10px;">
                 <button onclick="registerNewUserByAdmin()" style="background: #3498db; color: white; border: none; width: 100%; padding: 12px; margin-top: 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">➕ ဝန်ထမ်းအကောင့် ဆောက်မည်</button>
