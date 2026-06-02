@@ -10,10 +10,9 @@
             -webkit-text-security: disc !important;
             -text-security: disc !important;
         }
-        /* Search Box အတွက် ပုံစံဒီဇိုင်းအနည်းငယ် မွမ်းမံခြင်း */
         .search-container {
             margin-top: 12px;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
         .search-input {
             width: 100%;
@@ -22,6 +21,29 @@
             border-radius: 6px;
             font-size: 14px;
             box-sizing: border-box;
+        }
+        /* Filter ခလုတ်များအတွက် ဒီဇိုင်းလှလှလေး */
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .filter-btn {
+            flex: 1;
+            padding: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 1px solid #ddd;
+            background: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #555;
+            transition: all 0.2s ease;
+        }
+        .filter-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
         }
     </style>
 </head>
@@ -57,13 +79,13 @@
                 </div>
                 
                 <div style="margin-top: 15px; background: #ebf5fb; padding: 12px; border-radius: 6px; text-align: center; border: 1px dashed #3498db;">
-                    <span style="font-size: 14px; color: #2c3e50; font-weight: bold;">📊 လက်ရှိလက်ကျန် နှစ်ခုပေါင်း (ဘဏ် + NgweThar)</span><br>
-                    <span id="combined-balance" style="font-size: 22px; font-weight: bold; color: #2980b9;">0 ကျပ်</span>
+                    <span style="font-size: 14px; color: #2c3e50; font-weight: bold;">📊 လက်ရှိလက်ကျန် နှစ်ခုပေါင်း (ဘဏ် + ငွေသား)</span><br><span id="combined-balance" style="font-size: 22px; font-weight: bold; color: #2980b9;">0 ကျပ်</span>
                 </div>
 
                 <div class="balance-row" style="margin-top: 12px; border-top: 1px dashed #ddd; padding-top: 10px; display: flex; justify-content: space-between; gap: 10px; font-size: 14px;">
                     <div style="flex: 1;">🏦 ဘဏ်လက်ကျန်:<br><span id="banking-balance" style="font-weight: bold; color:#3498db;">0 ကျပ်</span></div>
-                    <div style="flex: 1;">💵 လက်ငင်းလက်ကျန်:<br><span id="cash-balance" style="font-weight: bold; color:#f39c12;">0 ကျပ်</span></div></div>
+                    <div style="flex: 1;">💵 လက်ငင်းလက်ကျန်:<br><span id="cash-balance" style="font-weight: bold; color:#f39c12;">0 ကျပ်</span></div>
+                </div>
             </div>
 
             <div class="card form-card" style="margin-top: 15px;">
@@ -105,6 +127,11 @@
                 
                 <div class="search-container">
                     <input type="text" id="tx-search-input" class="search-input" placeholder="🔍 ရှာလိုသော စာသား/ဖုန်းနံပါတ်/ဘဏ် ဖြည့်ပါ..." oninput="render()">
+                </div>
+
+                <div class="filter-buttons"><button id="filter-all-btn" class="filter-btn active" onclick="changeMethodFilter('All')">🔄 အားလုံးကြည့်မည်</button>
+                    <button id="filter-banking-btn" class="filter-btn" onclick="changeMethodFilter('Banking')">🏦 Banking သီးသန့်</button>
+                    <button id="filter-cash-btn" class="filter-btn" onclick="changeMethodFilter('Cash')">💵 Cash သီးသန့်</button>
                 </div>
                 
                 <ul id="transaction-list" class="tx-list" style="list-style: none; padding: 0; margin-top: 10px;"></ul>
