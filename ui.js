@@ -30,16 +30,21 @@ function render() {
         }
     });
 
-    // 💰 [အဓိကပြင်ဆင်ချက်] HTML ဘက်က ID တွေဆီသို့ ဂဏန်းများ ကွက်တိ ပို့ပေးခြင်း
+    // 💰 HTML ဘက်က ID တွေဆီသို့ ဂဏန်းများ ကွက်တိ ပို့ပေးခြင်း
     const netBalanceElement = document.getElementById('net-balance');
     const totalIncomeElement = document.getElementById('total-income');
     const totalExpenseElement = document.getElementById('total-expense');
+    const combinedBalanceElement = document.getElementById('combined-balance'); // အသစ်တိုးထားသော ID
     const bankingBalanceElement = document.getElementById('banking-balance');
     const cashBalanceElement = document.getElementById('cash-balance');
+
+    // နှစ်ခုပေါင်းလက်ကျန်ငွေ တွက်ချက်ခြင်း
+    let totalCombined = mainBankingBal + mainCashBal;
 
     if (netBalanceElement) netBalanceElement.innerText = (mainIncome - mainExpense).toLocaleString() + " ကျပ်";
     if (totalIncomeElement) totalIncomeElement.innerText = mainIncome.toLocaleString() + " ကျပ်";
     if (totalExpenseElement) totalExpenseElement.innerText = mainExpense.toLocaleString() + " ကျပ်";
+    if (combinedBalanceElement) combinedBalanceElement.innerText = totalCombined.toLocaleString() + " ကျပ်"; // ဂဏန်းအော်တိုပြရန်
     if (bankingBalanceElement) bankingBalanceElement.innerText = mainBankingBal.toLocaleString() + " ကျပ်";
     if (cashBalanceElement) cashBalanceElement.innerText = mainCashBal.toLocaleString() + " ကျပ်";
 
@@ -49,7 +54,6 @@ function render() {
         const li = document.createElement('li');
         li.className = t.type === "ဝင်ငွေ" ? "list-inc" : "list-exp";
         
-        // CSS Style များအတွက် သေသပ်အောင် ပြင်ဆင်ခြင်း
         li.style.display = "flex";
         li.style.justifyContent = "space-between";
         li.style.alignItems = "center";
@@ -83,7 +87,6 @@ function toggleBankNameInput() {
     }
     toggleCustomBankInput();
 }
-
 function toggleCustomBankInput() {
     const method = document.getElementById('method').value;
     const bankSelect = document.getElementById('bank-select');
