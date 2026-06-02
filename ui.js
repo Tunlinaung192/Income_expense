@@ -1,11 +1,30 @@
-// ui.js - Render Dashboard Data & List Display with Live Filter & Method Tab & Bank Dropdown Filter
+// ui.js - Render Dashboard Data & Drop-list (Accordion) Wise Bank Balances
 
 let activeMethodFilter = "All";
+
+// 🌟 [အသစ်ထည့်သွင်းမှု] Drop list အား ဖွင့်ရန်/ပိတ်ရန် တွက်ချက်မှု Function
+function toggleBankDropdownList() {
+    const content = document.getElementById('bank-accordion-content');
+    const arrow = document.getElementById('accordion-arrow');
+    
+    if (content && arrow) {
+        if (content.style.display === "block") {
+            content.style.display = "none";
+            arrow.innerText = "🔽";
+            // ပိတ်လိုက်တဲ့အခါ ထိပ်ပိုင်းဘောင်ဝိုင်းလေး ပြန်လှအောင်လုပ်ခြင်း
+            document.querySelector('.bank-accordion-header').style.borderRadius = "6px";
+        } else {
+            content.style.display = "block";
+            arrow.innerText = "🔼";
+            // ဖွင့်လိုက်တဲ့အခါ အောက်ဘက်ထောင့်စွန်းများကို Table နှင့် တစ်ဆက်တည်းဖြစ်အောင် လုပ်ခြင်း
+            document.querySelector('.bank-accordion-header').style.borderRadius = "6px 6px 0 0";
+        }
+    }
+}
 
 function changeMethodFilter(filterType) {
     activeMethodFilter = filterType;
     
-    // ခလုတ်များ၏ အရောင်အသွေး (Active State) ကို လဲလှယ်ခြင်း
     const btnAll = document.getElementById('filter-all-btn');
     const btnBank = document.getElementById('filter-banking-btn');
     const btnCash = document.getElementById('filter-cash-btn');
@@ -19,17 +38,15 @@ function changeMethodFilter(filterType) {
     if (filterType === 'Banking' && btnBank) btnBank.classList.add('active');
     if (filterType === 'Cash' && btnCash) btnCash.classList.add('active');
     
-    // 🌟 [အသစ်ထည့်သွင်းမှု] Banking သီးသန့်ခလုတ်နှိပ်လျှင် Dropdown အား ပြသပြီး ကျန်ခလုတ်များတွင် ဖျောက်ထားမည်
     if (bankFilterSelect) {
         if (filterType === "Banking") {
             bankFilterSelect.style.display = "block";
-            bankFilterSelect.value = "All_Banks"; // ပြန်ဖွင့်တိုင်း အားလုံးကို အရင်ပြရန် Reset လုပ်သည်
+            bankFilterSelect.value = "All_Banks"; 
         } else {
             bankFilterSelect.style.display = "none";
         }
     }
     
-    // UI အား ပြန်လည်ဆွဲတင်ခြင်း
     render();
 }
 
@@ -38,11 +55,9 @@ function render() {
     if (!listEl) return;
     listEl.innerHTML = "";
 
-    // Search Box ထဲမှ ရိုက်ထားသောစာသားအား ဆွဲယူခြင်း
     const searchSearchEl = document.getElementById('tx-search-input');
     const searchQuery = searchSearchEl ? searchSearchEl.value.trim().toLowerCase() : "";
 
-    // 🌟 ရွေးချယ်ထားသော Bank Filter နာမည်အား ဆွဲယူခြင်း
     const bankSelectEl = document.getElementById('bank-filter-select');
     const selectedBankFilter = bankSelectEl ? bankSelectEl.value : "All_Banks";
 
@@ -51,24 +66,46 @@ function render() {
     let bankBal = 0;
     let cashBal = 0;
 
-    // ၁။ Dashboard ပေါ်က စာရင်းဇယားတွက်ချက်မှုအပိုင်း (မူရင်းစာရင်းအားလုံးအပေါ် အခြေခံတွက်ချက်မည်)
+    let bankBalances = {
+        "Kpay": 0,
+        "Wavepay": 0,
+        "AYAPay": 0,
+        "CBPay": 0,
+        "KBZ Bank": 0,
+        "CB Bank": 0,
+        "Other": 0
+    };
+
     transactions.forEach(tx => {
         const amt = parseFloat(tx.amount) || 0;
+        let bName = tx.bankName || "Other";
+        
+        if (!bankBalances.hasOwnProperty(bName)) {
+            bName = "Other";
+        }
+
         if (tx.type === "ဝင်ငွေ") {
             totalInc += amt;
-            if (tx.method === "Banking") bankBal += amt;
-            else cashBal += amt;
+            if (tx.method === "Banking") {
+                bankBal += amt;
+                bankBalances[bName] += amt; 
+            } else {
+                cashBal += amt;
+            }
         } else if (tx.type === "ထွက်ငွေ") {
             totalExp += amt;
-            if (tx.method === "Banking") bankBal -= amt;
-            else cashBal -= amt;
+            if (tx.method === "Banking") {
+                bankBal -= amt;
+                bankBalances[bName] -= amt; 
+            } else {
+                cashBal -= amt;
+            }
         }
     });
 
     const netBal = totalInc - totalExp;
     const combinedBal = bankBal + cashBal;
 
-    // ဒေတာများကို Dashboard UI သို့ ပို့ခြင်း
     const netEl = document.getElementById('net-balance');
     const incEl = document.getElementById('total-income');
     const expEl = document.getElementById('total-expense');
@@ -79,11 +116,43 @@ function render() {
     if (netEl) netEl.innerText = `${netBal.toLocaleString()} ကျပ်`;
     if (incEl) incEl.innerText = `${totalInc.toLocaleString()} ကျပ်`;
     if (expEl) expEl.innerText = `${totalExp.toLocaleString()} ကျပ်`;
-    if (combEl) combEl.innerText = `${combinedBal.toLocaleString()} ကျပ်`;
+
+    if (combinedBal < 0) {
+        if (combEl) combEl.innerHTML = `<span style="color:#e74c3c;">${combinedBal.toLocaleString()} ကျပ်</span>`;
+    } else {
+        if (combEl) combEl.innerText = `${combinedBal.toLocaleString()} ကျပ်`;
+    }
     if (bnkEl) bnkEl.innerText = `${bankBal.toLocaleString()} ကျပ်`;
     if (cshEl) cshEl.innerText = `${cashBal.toLocaleString()} ကျပ်`;
 
-    // 🔍 ၂။ စာရင်းများကို အောက်ခြေစာရင်းပုံးထဲ ထည့်သွင်းပြသခြင်း (Method, Bank Dropdown နှင့် Search စုပေါင်းစစ်ထုတ်မည်)
+    // Drop list (Accordion Table) ထဲသို့ ဒေတာများထည့်သွင်းခြင်း
+    const bankTableBody = document.getElementById('bank-breakdown-rows');
+    if (bankTableBody) {
+        bankTableBody.innerHTML = "";
+        
+        const bankDisplayNames = {
+            "Kpay": "📱 KBZ Pay",
+            "Wavepay": "📱 Wave Pay",
+            "AYAPay": "📱 AYA Pay",
+            "CBPay": "📱 CB Pay",
+            "KBZ Bank": "🏦 KBZ Bank",
+            "CB Bank": "🏦 CB Bank",
+            "Other": "✨ အခြားဘဏ်များ (Other)"
+        };
+
+        for (let key in bankBalances) {
+            const row = document.createElement('tr');
+            const balVal = bankBalances[key];
+            const colorStyle = balVal < 0 ? "color:#e74c3c; font-weight:bold;" : "font-weight:bold;";
+
+            row.innerHTML = `
+                <td>${bankDisplayNames[key]}</td>
+                <td style="text-align: right; ${colorStyle}">${balVal.toLocaleString()} ကျပ်</td>
+            `;
+            bankTableBody.appendChild(row);
+        }
+    }
+
     transactions.forEach(tx => {
         const tId = tx.id || "";
         const tUser = tx.userKey || "";
@@ -94,25 +163,23 @@ function render() {
         const tDate = tx.date || "";
         const tTime = tx.time || "";
         const tMethod = tx.method || "";
-        const tBank = tx.bankName || "";// ကနဦး ဝင်ငွေ/ထွက်ငွေ ပုံစံ စစ်ထုတ်ခြင်း (Banking သို့မဟုတ် Cash)
+        const tBank = tx.bankName || "";
+
         if (activeMethodFilter !== "All" && tMethod !== activeMethodFilter) {
             return; 
         }
 
-        // 🌟 [အသစ်ထည့်သွင်းမှု] Banking စနစ်ထဲတွင် ဘဏ်နာမည်အလိုက် ထပ်ဆင့်စစ်ထုတ်ခြင်း
         if (activeMethodFilter === "Banking" && selectedBankFilter !== "All_Banks") {
-            // အကယ်၍ Dropdown ထဲတွင် 'Other' ရွေးထားပါက Kpay, Wavepay စသည်တို့ မဟုတ်သော အခြားစာသားများကို စစ်ထုတ်မည်
             if (selectedBankFilter === "Other") {
                 const knownBanks = ["Kpay", "Wavepay", "AYAPay", "CBPay", "KBZ Bank", "CB Bank"];
                 if (knownBanks.includes(tBank)) {
-                    return; // သတ်မှတ်ထားပြီးသားဘဏ်များဖြစ်ပါက ကျော်သွားမည် (မပြပါ)
+                    return; 
                 }
             } else if (tBank !== selectedBankFilter) {
-                return; // ရွေးချယ်ထားတဲ့ ဘဏ်နာမည်နဲ့ ကွက်တိမကိုက်ညီပါက ကျော်သွားမည်
+                return; 
             }
         }
 
-        // စာသားဖြင့် ထပ်ဆင့်ရှာဖွေမှု စည်းမျဉ်းသတ်မှတ်ခြင်း
         const matchDesc = tDesc.toLowerCase().includes(searchQuery);
         const matchUser = tUser.toLowerCase().includes(searchQuery);
         const matchBank = tBank.toLowerCase().includes(searchQuery);
@@ -146,8 +213,7 @@ function render() {
                     📅 ${tDate} (${tTime}) | 🏦 ${tMethod === 'Banking' ? tBank : 'လက်ငင်းငွေသား'}
                 </div>
             </div>
-            <div style="text-align:right;">
-                <span style="font-weight:bold; font-size:16px; color:${tType === 'ဝင်ငွေ' ? '#27ae60' : '#e74c3c'};">
+            <div style="text-align:right;"><span style="font-weight:bold; font-size:16px; color:${tType === 'ဝင်ငွေ' ? '#27ae60' : '#e74c3c'};">
                     ${tType === 'ဝင်ငွေ' ? '+' : '-'} ${tAmt.toLocaleString()}
                 </span>
                 <br>
@@ -162,7 +228,7 @@ function toggleBankNameInput() {
     const method = document.getElementById('method').value;
     const bankSelect = document.getElementById('bank-select');
     if (bankSelect) {
-        bankSelect.style.display = (method === 'Banking') ? 'block' : 'none';
+        bankSelect.style.display = (method === 'Banking' ? 'block' : 'none');
     }
     toggleCustomBankInput();
 }
@@ -172,7 +238,7 @@ function toggleCustomBankInput() {
     const bankSelect = document.getElementById('bank-select').value;
     const customBank = document.getElementById('custom-bank-name');
     if (customBank) {
-        customBank.style.display = (method === 'Banking' && bankSelect === 'Other') ? 'block' : 'none';
+        customBank.style.display = (method === 'Banking' && bankSelect === 'Other' ? 'block' : 'none');
     }
 }
 
@@ -182,5 +248,6 @@ function convertMyanmarToEnglishDigits(input) {
     for (let i = 0; i < 10; i++) {
         const regex = new RegExp(mmNumbers[i], 'g');
         output = output.replace(regex, i.toString());
-    }return output;
+    }
+    return output;
 }
