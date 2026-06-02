@@ -10,6 +10,19 @@
             -webkit-text-security: disc !important;
             -text-security: disc !important;
         }
+        /* Search Box အတွက် ပုံစံဒီဇိုင်းအနည်းငယ် မွမ်းမံခြင်း */
+        .search-container {
+            margin-top: 12px;
+            margin-bottom: 12px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #3498db;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
@@ -44,19 +57,19 @@
                 </div>
                 
                 <div style="margin-top: 15px; background: #ebf5fb; padding: 12px; border-radius: 6px; text-align: center; border: 1px dashed #3498db;">
-                    <span style="font-size: 14px; color: #2c3e50; font-weight: bold;">📊 လက်ရှိလက်ကျန် နှစ်ခုပေါင်း (ဘဏ် + ငွေသား)</span><br>
+                    <span style="font-size: 14px; color: #2c3e50; font-weight: bold;">📊 လက်ရှိလက်ကျန် နှစ်ခုပေါင်း (ဘဏ် + NgweThar)</span><br>
                     <span id="combined-balance" style="font-size: 22px; font-weight: bold; color: #2980b9;">0 ကျပ်</span>
                 </div>
 
                 <div class="balance-row" style="margin-top: 12px; border-top: 1px dashed #ddd; padding-top: 10px; display: flex; justify-content: space-between; gap: 10px; font-size: 14px;">
                     <div style="flex: 1;">🏦 ဘဏ်လက်ကျန်:<br><span id="banking-balance" style="font-weight: bold; color:#3498db;">0 ကျပ်</span></div>
-                    <div style="flex: 1;">💵 လက်ငင်းလက်ကျန်:<br><span id="cash-balance" style="font-weight: bold; color:#f39c12;">0 ကျပ်</span></div>
-                </div>
+                    <div style="flex: 1;">💵 လက်ငင်းလက်ကျန်:<br><span id="cash-balance" style="font-weight: bold; color:#f39c12;">0 ကျပ်</span></div></div>
             </div>
 
             <div class="card form-card" style="margin-top: 15px;">
                 <h3>📝 စာရင်းအသစ်ထည့်ရန်</h3>
-                <input type="number" id="amount" placeholder="ပမာဏ (ကျပ်)" inputmode="numeric" style="width: 100%; margin-top: 10px; padding: 10px;" required><input type="text" id="description" placeholder="အကြောင်းအရာ" style="width: 100%; margin-top: 10px; padding: 10px;" required>
+                <input type="number" id="amount" placeholder="ပမာဏ (ကျပ်)" inputmode="numeric" style="width: 100%; margin-top: 10px; padding: 10px;" required>
+                <input type="text" id="description" placeholder="အကြောင်းအရာ" style="width: 100%; margin-top: 10px; padding: 10px;" required>
                 
                 <select id="method" onchange="toggleBankNameInput()" style="width: 100%; margin-top: 10px; padding: 10px;">
                     <option value="Banking">🏦 Banking (ဘဏ် / Kpay)</option>
@@ -89,6 +102,11 @@
 
             <div class="card" style="margin-top: 15px;">
                 <h3>📋 စာရင်းမှတ်တမ်းများ</h3>
+                
+                <div class="search-container">
+                    <input type="text" id="tx-search-input" class="search-input" placeholder="🔍 ရှာလိုသော စာသား/ဖုန်းနံပါတ်/ဘဏ် ဖြည့်ပါ..." oninput="render()">
+                </div>
+                
                 <ul id="transaction-list" class="tx-list" style="list-style: none; padding: 0; margin-top: 10px;"></ul>
             </div>
 
