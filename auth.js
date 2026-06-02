@@ -61,7 +61,7 @@ function loginUser() {
             }
         })
         .catch(err => {
-            alert("🌐 ချိတ်ဆက်မှု Error တက်နေပါသည်။ Web App URL သို့မဟုတ် အင်တာနက်လိုင်းကို စစ်ဆေးပါ။");
+            alert("🌐 ချက်ဆက်မှု Error တက်နေပါသည်။ Web App URL ကို စစ်ဆေးပါ။");
         });
     } else {
         alert("❌ အကောင့်ဝင်ရန် အင်တာနက်လိုင်း လိုအပ်ပါသည်။");
@@ -99,6 +99,7 @@ function registerNewUserByAdmin() {
 
 function logoutUser() {
     localStorage.clear();
-    current_user_key = "";current_acc_type = "";
+    current_user_key = ""; 
+    current_acc_type = "";
     location.reload();
 }
