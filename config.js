@@ -1,5 +1,5 @@
 // config.js - Global Variables
-const google_script_url = "https://script.google.com/macros/s/AKfycbw4YmxymLvDf8aJeO0dvZFKmnMAxBBMRHDlbCWYLt92LHGyS8jHqgHFvqy0M6kukMxPpw/exec"; 
+const google_script_url = "https://script.google.com/macros/s/AKfycbyqS0EPAf9OgTP1KxOto-JdsCj2EgGxBy6W5d-fPFGpNSP33d7RRIH5uUeDMY0m6UwzTw/exec"; 
 
 let current_user_key = localStorage.getItem('logged_user_key') || "";
 let current_acc_type = localStorage.getItem('logged_acc_type') || "";
