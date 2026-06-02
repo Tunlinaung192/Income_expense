@@ -44,7 +44,6 @@
             color: white;
             border-color: #3498db;
         }
-        /* 🌟 ဘဏ် Filter Dropdown အတွက် စတိုင်လ် */
         .bank-filter-select {
             width: 100%;
             padding: 8px;
@@ -55,6 +54,49 @@
             background-color: #fafffa;
             color: #2c3e50;
             font-weight: bold;
+        }
+        .bank-breakdown-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            background: #ffffff;
+        }
+        .bank-breakdown-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #f1f1f1;
+            color: #2c3e50;
+        }
+        .bank-breakdown-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* 🌟 [အသစ်ထည့်သွင်းမှု] Drop list (Accordion) အတွက် ဒီဇိုင်းဆန်းလှလှလေး */
+        .bank-accordion-header {
+            background: #f1f2f6;
+            color: #2c3e50;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #dcdde1;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        .bank-accordion-header:hover {
+            background: #e1e2e6;
+        }
+        .bank-accordion-content {
+            display: none; /* အစကတည်းက ပိတ်ထားမည် */
+            padding: 5px;
+            background: #fafafa;
+            border: 1px solid #dcdde1;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -73,9 +115,7 @@
             </form>
         </div>
 
-        <div id="main-app" style="display: none;">
-            
-            <div class="user-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #f8f9fa; padding: 10px; border-radius: 8px;">
+        <div id="main-app" style="display: none;"><div class="user-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #f8f9fa; padding: 10px; border-radius: 8px;">
                 <span id="active-user-display" style="font-weight: bold; color: #2c3e50;">📱 Loading...</span>
                 <button onclick="logoutUser()" style="background:#e74c3c; color: white; border: none; padding: 6px 12px; font-size:12px; border-radius: 4px; cursor: pointer;">ထွက်မည် 🏃</button>
             </div>
@@ -87,14 +127,29 @@
                 <div class="balance-row" style="display: flex; justify-content: space-between; gap: 10px;">
                     <div style="flex: 1; background: #eafaf1; padding: 10px; border-radius: 6px;">🔺 ဝင်ငွေစုစုပေါင်း:<br><span id="total-income" class="text-inc" style="font-weight: bold; color: #27ae60;">0 ကျပ်</span></div>
                     <div style="flex: 1; background: #fdedec; padding: 10px; border-radius: 6px;">🔻 ထွက်ငွေစုစုပေါင်း:<br><span id="total-expense" class="text-exp" style="font-weight: bold; color: #e74c3c;">0 ကျပ်</span></div>
-                </div><div style="margin-top: 15px; background: #ebf5fb; padding: 12px; border-radius: 6px; text-align: center; border: 1px dashed #3498db;">
+                </div>
+                
+                <div style="margin-top: 15px; background: #ebf5fb; padding: 12px; border-radius: 6px; text-align: center; border: 1px dashed #3498db;">
                     <span style="font-size: 14px; color: #2c3e50; font-weight: bold;">📊 လက်ရှိလက်ကျန် နှစ်ခုပေါင်း (ဘဏ် + ငွေသား)</span><br>
                     <span id="combined-balance" style="font-size: 22px; font-weight: bold; color: #2980b9;">0 ကျပ်</span>
                 </div>
 
-                <div class="balance-row" style="margin-top: 12px; border-top: 1px dashed #ddd; padding-top: 10px; display: flex; justify-content: space-between; gap: 10px; font-size: 14px;">
-                    <div style="flex: 1;">🏦 ဘဏ်လက်ကျန်:<br><span id="banking-balance" style="font-weight: bold; color:#3498db;">0 ကျပ်</span></div>
+                <div class="balance-row" style="margin-top: 12px; border-top: 1px dashed #ddd; padding-top: 10px; display: flex; justify-content: space-between; gap: 10px; font-size: 14px; margin-bottom: 12px;">
+                    <div style="flex: 1;">🏦 ဘဏ်လက်ကျန်စုစုပေါင်း:<br><span id="banking-balance" style="font-weight: bold; color:#3498db;">0 ကျပ်</span></div>
                     <div style="flex: 1;">💵 လက်ငင်းလက်ကျန်:<br><span id="cash-balance" style="font-weight: bold; color:#f39c12;">0 ကျပ်</span></div>
+                </div>
+
+                <div id="bank-breakdown-section" style="margin-top: 10px; border-top: 1px solid #ddd; padding-top: 12px;">
+                    <div class="bank-accordion-header" onclick="toggleBankDropdownList()">
+                        <span>📊 ဘဏ်တစ်ခုချင်းစီအလိုက် လက်ကျန်ငွေကြည့်ရန်</span>
+                        <span id="accordion-arrow">🔽</span>
+                    </div>
+                    <div id="bank-accordion-content" class="bank-accordion-content">
+                        <table class="bank-breakdown-table">
+                            <tbody id="bank-breakdown-rows">
+                                </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -110,8 +165,7 @@
                 
                 <select id="bank-select" onchange="toggleCustomBankInput()" style="width: 100%; margin-top: 10px; padding: 10px;">
                     <option value="Kpay">KBZ Pay</option>
-                    <option value="Wavepay">Wave Pay</option>
-                    <option value="AYAPay">AYA Pay</option>
+                    <option value="Wavepay">Wave Pay</option><option value="AYAPay">AYA Pay</option>
                     <option value="CBPay">CB Pay</option>
                     <option value="KBZ Bank">KBZ Bank</option>
                     <option value="CB Bank">CB Bank</option>
@@ -135,7 +189,8 @@
             <div class="card" style="margin-top: 15px;">
                 <h3>📋 စာရင်းမှတ်တမ်းများ</h3>
                 
-                <div class="search-container"><input type="text" id="tx-search-input" class="search-input" placeholder="🔍 ရှာလိုသော စာသား/ဖုန်းနံပါတ်/အကြောင်းအရာ..." oninput="render()">
+                <div class="search-container">
+                    <input type="text" id="tx-search-input" class="search-input" placeholder="🔍 ရှာလိုသော စာသား/ဖုန်းနံပါတ်/အကြောင်းအရာ..." oninput="render()">
                 </div>
 
                 <div class="filter-buttons">
