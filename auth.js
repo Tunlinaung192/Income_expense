@@ -10,19 +10,17 @@ function checkLoginStatus() {
     const mainApp = document.getElementById('main-app');
     const adminPanel = document.getElementById('admin-panel');
     const userDisplay = document.getElementById('active-user-display');
-    const balanceCard = document.querySelector('.balance-card'); // စာရင်းဇယားကတ်ပြား
+    const balanceCard = document.querySelector('.balance-card');
 
     if (current_user_key) {
         if (loginSection) loginSection.style.display = "none";
         if (mainApp) mainApp.style.display = "block";
         if (userDisplay) userDisplay.innerText = `📱 Phone: ${current_user_key} (${current_acc_type})`;
         
-        // 🚨 [အရေးကြီးဆုံးအပိုင်း] ဝင်ထားသူသည် Admin မဟုတ်ပါက...
         if (current_acc_type === "User") {
-            if (adminPanel) adminPanel.style.display = "none";   // ဝန်ထမ်းတိုးတဲ့ Panel ကို ဖျောက်မည်
-            if (balanceCard) balanceCard.style.display = "none"; // စုစုပေါင်း ဝင်ငွေ/ထွက်ငွေ လက်ကျန် Dashboard ကို ဖျောက်မည်
+            if (adminPanel) adminPanel.style.display = "none";
+            if (balanceCard) balanceCard.style.display = "none";
         } else {
-            // Admin ဖြစ်ပါက အကုန် ပြန်ပြမည်
             if (adminPanel) adminPanel.style.display = "block";
             if (balanceCard) balanceCard.style.display = "block";
         }
@@ -46,7 +44,6 @@ function loginUser() {
     
     if (!phoneInput || !passInput) { alert("❌ ဖုန်းနံပါတ်နှင့် Password ဖြည့်ပါ"); return; }
 
-    // Server (Google Sheets) သို့ လှမ်းစစ်ခြင်း
     if (navigator.onLine) {
         fetch(`${google_script_url}?action=check_login&phoneNumber=${phoneInput}&password=${passInput}`)
         .then(res => res.json())
@@ -64,14 +61,13 @@ function loginUser() {
             }
         })
         .catch(err => {
-            alert("🌐 ကွန်ရက်ချိတ်ဆက်မှု မာန်နေပါသည်။ Incognito Mode ဖြင့် ပြန်လည်စမ်းသပ်ပါ။");
+            alert("🌐 ချိတ်ဆက်မှု Error တက်နေပါသည်။ Web App URL သို့မဟုတ် အင်တာနက်လိုင်းကို စစ်ဆေးပါ။");
         });
     } else {
         alert("❌ အကောင့်ဝင်ရန် အင်တာနက်လိုင်း လိုအပ်ပါသည်။");
     }
 }
 
-// 👥 Admin ကနေ ဝန်ထမ်းအသစ်တိုးပြီး Admin Password တောင်းမည့် စနစ်
 function registerNewUserByAdmin() {
     let newPhone = document.getElementById('new-user-phone').value.trim();
     let newPass = document.getElementById('new-user-pass').value.trim();
@@ -81,26 +77,21 @@ function registerNewUserByAdmin() {
 
     if (!newPhone || !newPass) { alert("❌ ဝန်ထမ်းဖုန်းနှင့် Password ဖြည့်ပါ"); return; }
     
-    // 🔑 Admin Password အား အတည်ပြုချက်တောင်းခြင်း
-    let adminConfirmPass = prompt("🔒 ဤဝန်ထမ်းအား ဆောက်လုပ်ရန် သင်၏ Admin Password (ဝင်ခွင့်ကုဒ်) ကို ရိုက်ထည့်ပါ:");
+    let adminConfirmPass = prompt("🔒 ဤဝန်ထမ်းအား ဆောက်လုပ်ရန် သင်၏ Admin Password ကို ရိုက်ထည့်ပါ:");
     if (adminConfirmPass === null) return;
     adminConfirmPass = convertMyanmarToEnglishDigits(adminConfirmPass.trim());
 
     if (navigator.onLine) {
-        const formPayload = new URLSearchParams();
-        formPayload.append("action", "register_user");
-        formPayload.append("newPhone", newPhone);
-        formPayload.append("newPassword", newPass);
-        formPayload.append("adminPassword", adminConfirmPass);fetch(google_script_url, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: formPayload
-        }).then(() => {
-            alert("🎉 စနစ်အတွင်းသို့ ပို့လွှတ်ပြီးပါပြီ။ (Password မှန်ကန်ပါက Sheet ထဲတွင် အော်တို တိုးသွားပါမည်)");
-            document.getElementById('new-user-phone').value = "";
-            document.getElementById('new-user-pass').value = "";
-        }).catch(err => alert("Error: " + err));
+        fetch(`${google_script_url}?action=register_user&newPhone=${newPhone}&newPassword=${newPass}&currentAdminPhone=${current_user_key}&adminPassword=${adminConfirmPass}`)
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            if (data.status === "success") {
+                document.getElementById('new-user-phone').value = "";
+                document.getElementById('new-user-pass').value = "";
+            }
+        })
+        .catch(err => alert("Error: " + err));
     } else {
         alert("🌐 အင်တာနက်လိုင်း လိုအပ်ပါသည်။");
     }
@@ -108,7 +99,6 @@ function registerNewUserByAdmin() {
 
 function logoutUser() {
     localStorage.clear();
-    current_user_key = ""; 
-    current_acc_type = "";
+    current_user_key = "";current_acc_type = "";
     location.reload();
 }
